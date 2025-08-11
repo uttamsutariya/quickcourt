@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useNavigate } from "react-router-dom";
 import useLogout from "@/hooks/useLogout";
+import useAuthStore from "@/stores/auth-store";
 
 const ComingSoon = () => {
 	const navigate = useNavigate();
 	const handleLogout = useLogout();
+	const { isAuthenticated, user } = useAuthStore();
 
 	return (
 		<div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
@@ -38,15 +40,36 @@ const ComingSoon = () => {
 				</div>
 
 				<div className="flex flex-col sm:flex-row gap-4 justify-center">
-					<Button onClick={() => navigate("/auth/login")} className="gradient-primary text-white hover:opacity-90">
-						Sign In
-					</Button>
-					<Button onClick={() => navigate("/auth/role-selection")} variant="outline">
-						Sign Up
-					</Button>
-					<Button onClick={handleLogout} variant="ghost">
-						Logout
-					</Button>
+					{isAuthenticated && user ? (
+						<>
+							<Button onClick={handleLogout} className="gradient-primary text-white hover:opacity-90">
+								Logout
+							</Button>
+							<Button
+								onClick={() => {
+									// Navigate to appropriate dashboard based on role
+									const roleRedirects = {
+										user: "/user/dashboard",
+										facility_owner: "/owner/dashboard",
+										admin: "/admin/dashboard",
+									};
+									navigate(roleRedirects[user.role as keyof typeof roleRedirects] || "/user/dashboard");
+								}}
+								variant="outline"
+							>
+								Go to Dashboard
+							</Button>
+						</>
+					) : (
+						<>
+							<Button onClick={() => navigate("/auth/login")} className="gradient-primary text-white hover:opacity-90">
+								Sign In
+							</Button>
+							<Button onClick={() => navigate("/auth/role-selection")} variant="outline">
+								Sign Up
+							</Button>
+						</>
+					)}
 				</div>
 
 				<div className="pt-8 border-t">
