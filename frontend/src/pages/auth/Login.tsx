@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Trophy, LogIn, UserPlus, ArrowLeft } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-react";
 
@@ -24,6 +25,7 @@ const Login = () => {
 						<ArrowLeft className="h-5 w-5" />
 						<span>Back</span>
 					</button>
+					<ThemeToggle />
 				</div>
 			</div>
 

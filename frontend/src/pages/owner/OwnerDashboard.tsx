@@ -1,134 +1,143 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Plus, BarChart3, Calendar, Settings, LogOut } from "lucide-react";
+import { Building2, Plus, Calendar, TrendingUp, Users, Clock, DollarSign } from "lucide-react";
 import useAuthStore from "@/stores/auth-store";
-import { useAuth } from "@workos-inc/authkit-react";
+import { Button } from "@/components/ui/button";
 
 const OwnerDashboard = () => {
 	const navigate = useNavigate();
-	const { user, logout } = useAuthStore();
-	const { signOut: workosLogout } = useAuth();
+	const { user } = useAuthStore();
 
-	const handleLogout = () => {
-		logout();
-		workosLogout();
-		navigate("/");
-	};
+	const stats = [
+		{
+			title: "Total Venues",
+			value: "0",
+			description: "Active venues",
+			icon: Building2,
+			color: "text-blue-500",
+			bgColor: "bg-blue-500/10",
+		},
+		{
+			title: "Total Bookings",
+			value: "0",
+			description: "This month",
+			icon: Calendar,
+			color: "text-green-500",
+			bgColor: "bg-green-500/10",
+		},
+		{
+			title: "Revenue",
+			value: "₹0",
+			description: "This month",
+			icon: DollarSign,
+			color: "text-purple-500",
+			bgColor: "bg-purple-500/10",
+		},
+		{
+			title: "Active Courts",
+			value: "0",
+			description: "Available for booking",
+			icon: Users,
+			color: "text-orange-500",
+			bgColor: "bg-orange-500/10",
+		},
+	];
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="container mx-auto p-6">
 			{/* Header */}
-			<header className="border-b">
-				<div className="container mx-auto px-6 py-4">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center space-x-4">
-							<Building2 className="h-8 w-8 text-primary" />
-							<div>
-								<h1 className="text-2xl font-bold">Facility Owner Dashboard</h1>
-								<p className="text-sm text-muted-foreground">Welcome back, {user?.name}</p>
+			<div className="mb-8">
+				<h1 className="text-3xl font-bold">Welcome back, {user?.name}!</h1>
+				<p className="text-muted-foreground mt-2">Here's an overview of your facilities</p>
+			</div>
+
+			{/* Stats Grid */}
+			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+				{stats.map((stat) => (
+					<Card key={stat.title}>
+						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+							<CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+							<div className={`p-2 rounded-lg ${stat.bgColor}`}>
+								<stat.icon className={`h-4 w-4 ${stat.color}`} />
+							</div>
+						</CardHeader>
+						<CardContent>
+							<div className="text-2xl font-bold">{stat.value}</div>
+							<p className="text-xs text-muted-foreground">{stat.description}</p>
+						</CardContent>
+					</Card>
+				))}
+			</div>
+
+			{/* Quick Actions */}
+			<Card className="mb-8">
+				<CardHeader>
+					<CardTitle>Quick Actions</CardTitle>
+					<CardDescription>Manage your sports facilities</CardDescription>
+				</CardHeader>
+				<CardContent className="grid gap-4 md:grid-cols-3">
+					<Button onClick={() => navigate("/owner/venues/new")} className="gradient-primary text-primary-foreground">
+						<Plus className="mr-2 h-4 w-4" />
+						Add New Venue
+					</Button>
+					<Button variant="outline" onClick={() => navigate("/owner/venues")}>
+						<Building2 className="mr-2 h-4 w-4" />
+						Manage Venues
+					</Button>
+					<Button variant="outline" onClick={() => navigate("/owner/bookings")}>
+						<Calendar className="mr-2 h-4 w-4" />
+						View Bookings
+					</Button>
+				</CardContent>
+			</Card>
+
+			{/* Recent Activity */}
+			<div className="grid gap-6 md:grid-cols-2">
+				{/* Recent Bookings */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Recent Bookings</CardTitle>
+						<CardDescription>Latest bookings from your venues</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="flex items-center justify-center py-8 text-muted-foreground">
+							<div className="text-center">
+								<Clock className="h-12 w-12 mx-auto mb-3" />
+								<p>No recent bookings</p>
 							</div>
 						</div>
-						<Button variant="ghost" onClick={handleLogout}>
-							<LogOut className="h-4 w-4 mr-2" />
-							Logout
-						</Button>
-					</div>
-				</div>
-			</header>
+					</CardContent>
+				</Card>
 
-			{/* Main Content */}
-			<main className="container mx-auto px-6 py-8">
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{/* Add Venue Card */}
-					<Card className="hover:shadow-lg transition-shadow cursor-pointer border-dashed border-2">
-						<CardHeader className="text-center">
-							<div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-2">
-								<Plus className="h-8 w-8 text-primary" />
+				{/* Revenue Trend */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Revenue Trend</CardTitle>
+						<CardDescription>Your earnings over time</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="flex items-center justify-center py-8 text-muted-foreground">
+							<div className="text-center">
+								<TrendingUp className="h-12 w-12 mx-auto mb-3" />
+								<p>No data available</p>
 							</div>
-							<CardTitle>Add New Venue</CardTitle>
-							<CardDescription>List your sports facility on QuickCourt</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Button className="w-full gradient-primary text-white">Add Venue</Button>
-						</CardContent>
-					</Card>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
 
-					{/* Manage Venues Card */}
-					<Card className="hover:shadow-lg transition-shadow">
-						<CardHeader>
-							<div className="flex items-center justify-between">
-								<Building2 className="h-6 w-6 text-primary" />
-								<span className="text-2xl font-bold">0</span>
-							</div>
-							<CardTitle>My Venues</CardTitle>
-							<CardDescription>Manage your listed facilities</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Button variant="outline" className="w-full">
-								View All
-							</Button>
-						</CardContent>
-					</Card>
-
-					{/* Bookings Card */}
-					<Card className="hover:shadow-lg transition-shadow">
-						<CardHeader>
-							<div className="flex items-center justify-between">
-								<Calendar className="h-6 w-6 text-primary" />
-								<span className="text-2xl font-bold">0</span>
-							</div>
-							<CardTitle>Total Bookings</CardTitle>
-							<CardDescription>This month's bookings</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Button variant="outline" className="w-full">
-								View Calendar
-							</Button>
-						</CardContent>
-					</Card>
-
-					{/* Revenue Card */}
-					<Card className="hover:shadow-lg transition-shadow">
-						<CardHeader>
-							<div className="flex items-center justify-between">
-								<BarChart3 className="h-6 w-6 text-primary" />
-								<span className="text-2xl font-bold">₹0</span>
-							</div>
-							<CardTitle>Revenue</CardTitle>
-							<CardDescription>This month's earnings</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Button variant="outline" className="w-full">
-								View Report
-							</Button>
-						</CardContent>
-					</Card>
-
-					{/* Settings Card */}
-					<Card className="hover:shadow-lg transition-shadow">
-						<CardHeader>
-							<Settings className="h-6 w-6 text-primary mb-2" />
-							<CardTitle>Settings</CardTitle>
-							<CardDescription>Manage your account settings</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Button variant="outline" className="w-full">
-								Open Settings
-							</Button>
-						</CardContent>
-					</Card>
-				</div>
-
-				{/* Coming Soon Notice */}
-				<div className="mt-8 p-6 rounded-lg bg-primary/5 border border-primary/20">
-					<h3 className="text-lg font-semibold mb-2">🚧 Features Coming Soon</h3>
+			{/* Coming Soon Notice */}
+			<Card className="mt-8 border-primary/20 bg-primary/5">
+				<CardHeader>
+					<CardTitle>🚧 More Features Coming Soon</CardTitle>
+				</CardHeader>
+				<CardContent>
 					<p className="text-muted-foreground">
-						We're working on bringing you powerful tools to manage your sports facilities. Stay tuned for venue
-						management, court scheduling, booking management, and detailed analytics!
+						We're continuously improving the platform. Soon you'll have access to detailed analytics, automated
+						scheduling, customer insights, and much more!
 					</p>
-				</div>
-			</main>
+				</CardContent>
+			</Card>
 		</div>
 	);
 };

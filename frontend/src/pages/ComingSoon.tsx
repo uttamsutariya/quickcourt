@@ -1,22 +1,20 @@
 import { Trophy, Construction } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useNavigate } from "react-router-dom";
-import useAuthStore from "@/stores/auth-store";
-import { useAuth } from "@workos-inc/authkit-react";
+import useLogout from "@/hooks/useLogout";
 
 const ComingSoon = () => {
 	const navigate = useNavigate();
-	const { logout } = useAuthStore();
-	const { signOut: workosLogout } = useAuth();
-
-	const handleLogout = () => {
-		logout();
-		workosLogout();
-		navigate("/");
-	};
+	const handleLogout = useLogout();
 
 	return (
-		<div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+		<div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
+			{/* Theme Toggle in top right */}
+			<div className="absolute top-4 right-4">
+				<ThemeToggle />
+			</div>
+
 			<div className="max-w-2xl mx-auto text-center space-y-8 animate-fade-in">
 				<div className="flex justify-center">
 					<div className="relative">

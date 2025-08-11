@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { User, Building2, Trophy, ArrowRight, CheckCircle } from "lucide-react";
 import useAuthStore from "@/stores/auth-store";
 import { USER_ROLES } from "@/config/constants";
@@ -62,9 +63,12 @@ const RoleSelection = () => {
 						<Trophy className="h-8 w-8 text-primary" />
 						<span className="text-2xl font-bold text-gradient-primary">QuickCourt</span>
 					</div>
-					<Button variant="ghost" onClick={() => navigate("/auth/login")}>
-						Already have an account? Sign in
-					</Button>
+					<div className="flex items-center gap-2">
+						<ThemeToggle />
+						<Button variant="ghost" onClick={() => navigate("/auth/login")}>
+							Already have an account? Sign in
+						</Button>
+					</div>
 				</div>
 			</div>
 

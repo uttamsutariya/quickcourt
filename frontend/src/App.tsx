@@ -12,12 +12,16 @@ import RoleSelection from "@/pages/auth/RoleSelection";
 import AuthCallback from "@/pages/auth/AuthCallback";
 
 // Protected Pages
+import OwnerLayout from "@/components/owner/OwnerLayout";
 import OwnerDashboard from "@/pages/owner/OwnerDashboard";
+import MyVenues from "@/pages/owner/MyVenues";
+import CreateVenue from "@/pages/owner/CreateVenue";
 import ComingSoon from "@/pages/ComingSoon";
 
 // Components
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -31,56 +35,67 @@ const queryClient = new QueryClient({
 
 function App() {
 	return (
-		<QueryClientProvider client={queryClient}>
-			<AuthKitProvider clientId={WORKOS_CLIENT_ID} redirectUri={WORKOS_REDIRECT_URI}>
-				<AuthProvider>
-					<Router>
-						<Routes>
-							{/* Public Routes */}
-							<Route path="/" element={<ComingSoon />} />
-							<Route path="/auth/login" element={<Login />} />
-							<Route path="/auth/role-selection" element={<RoleSelection />} />
-							<Route path="/auth/callback" element={<AuthCallback />} />
+		<ThemeProvider defaultTheme="dark">
+			<QueryClientProvider client={queryClient}>
+				<AuthKitProvider clientId={WORKOS_CLIENT_ID} redirectUri={WORKOS_REDIRECT_URI}>
+					<AuthProvider>
+						<Router>
+							<Routes>
+								{/* Public Routes */}
+								<Route path="/" element={<ComingSoon />} />
+								<Route path="/auth/login" element={<Login />} />
+								<Route path="/auth/role-selection" element={<RoleSelection />} />
+								<Route path="/auth/callback" element={<AuthCallback />} />
 
-							{/* User Dashboard (Coming Soon) */}
-							<Route
-								path="/dashboard"
-								element={
-									<ProtectedRoute allowedRoles={["user"]}>
-										<ComingSoon />
-									</ProtectedRoute>
-								}
-							/>
+								{/* User Dashboard (Coming Soon) */}
+								<Route
+									path="/dashboard"
+									element={
+										<ProtectedRoute allowedRoles={["user"]}>
+											<ComingSoon />
+										</ProtectedRoute>
+									}
+								/>
 
-							{/* Facility Owner Routes */}
-							<Route
-								path="/owner/dashboard"
-								element={
-									<ProtectedRoute allowedRoles={["facility_owner"]}>
-										<OwnerDashboard />
-									</ProtectedRoute>
-								}
-							/>
+								{/* Facility Owner Routes */}
+								<Route
+									path="/owner"
+									element={
+										<ProtectedRoute allowedRoles={["facility_owner"]}>
+											<OwnerLayout />
+										</ProtectedRoute>
+									}
+								>
+									<Route path="dashboard" element={<OwnerDashboard />} />
+									<Route path="venues" element={<MyVenues />} />
+									<Route path="venues/new" element={<CreateVenue />} />
+									<Route path="venues/:id" element={<ComingSoon />} />
+									<Route path="venues/:id/edit" element={<ComingSoon />} />
+									<Route path="bookings" element={<ComingSoon />} />
+									<Route path="settings" element={<ComingSoon />} />
+									<Route index element={<Navigate to="/owner/dashboard" replace />} />
+								</Route>
 
-							{/* Admin Routes (Coming Soon) */}
-							<Route
-								path="/admin/dashboard"
-								element={
-									<ProtectedRoute allowedRoles={["admin"]}>
-										<ComingSoon />
-									</ProtectedRoute>
-								}
-							/>
+								{/* Admin Routes (Coming Soon) */}
+								<Route
+									path="/admin/dashboard"
+									element={
+										<ProtectedRoute allowedRoles={["admin"]}>
+											<ComingSoon />
+										</ProtectedRoute>
+									}
+								/>
 
-							{/* Catch all - redirect to home */}
-							<Route path="*" element={<Navigate to="/" replace />} />
-						</Routes>
+								{/* Catch all - redirect to home */}
+								<Route path="*" element={<Navigate to="/" replace />} />
+							</Routes>
 
-						<Toaster position="top-right" richColors closeButton />
-					</Router>
-				</AuthProvider>
-			</AuthKitProvider>
-		</QueryClientProvider>
+							<Toaster position="top-right" richColors closeButton />
+						</Router>
+					</AuthProvider>
+				</AuthKitProvider>
+			</QueryClientProvider>
+		</ThemeProvider>
 	);
 }
 
