@@ -22,7 +22,7 @@ QuickCourt is a platform that enables sports enthusiasts to book local sports fa
 - WorkOs for auth
 - Typescript
 
-## Team Members
+## Team Members (Team - 78)
 
 Uttam Sutariya
 
