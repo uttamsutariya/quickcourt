@@ -114,6 +114,7 @@ For each day of the week, a court has:
 - Start Time: 9:00 AM
 - Slot Duration: 1 hour
 - Number of Slots: 8
+- Based on the slot duration & No of slots, it can't exceed 24 hours (this should be handled at frontend and backend as well)
 
 **Generated Slots:**
 
@@ -244,12 +245,6 @@ Features:
 - **Default Price**: Set per court
 - **Day-Specific Price**: Can override for specific days (weekends)
 - **Total Calculation**: Number of slots × price per slot
-
-### Operating Hours
-
-- Set per facility (not per court)
-- All courts follow facility operating hours
-- Can be different for each day of the week
 
 ---
 
