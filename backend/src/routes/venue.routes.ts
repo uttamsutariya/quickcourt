@@ -6,6 +6,13 @@ import { UserRole } from "../types/enums";
 const router = Router();
 
 /**
+ * @route   GET /api/venues
+ * @desc    Get all venues with filters
+ * @access  Public
+ */
+router.get("/", venueController.getVenues);
+
+/**
  * @route   POST /api/venues
  * @desc    Create a new venue
  * @access  Private (Facility Owner)
@@ -21,7 +28,7 @@ router.get("/my", authenticate, authorize(UserRole.FACILITY_OWNER), venueControl
 
 /**
  * @route   GET /api/venues/approved
- * @desc    Get all approved venues (public listing)
+ * @desc    Get all approved venues (public listing) - DEPRECATED
  * @access  Public
  */
 router.get("/approved", venueController.getApprovedVenues);

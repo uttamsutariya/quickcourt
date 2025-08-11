@@ -218,7 +218,81 @@ export const deleteVenue = async (req: Request, res: Response) => {
 };
 
 /**
- * Get all approved venues (public endpoint)
+ * Get all venues with filters (public endpoint)
+ */
+export const getVenues = async (req: Request, res: Response) => {
+	try {
+		const { search, sports, city, status, venueType, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
+
+		const query: any = {
+			isActive: true,
+		};
+
+		// Add status filter (default to approved for public access)
+		if (status) {
+			query.status = status;
+		} else {
+			// Default to approved venues for public access
+			query.status = VenueStatus.APPROVED;
+		}
+
+		// Add search filter
+		if (search) {
+			query.$or = [{ name: { $regex: search, $options: "i" } }, { description: { $regex: search, $options: "i" } }];
+		}
+
+		// Add sports filter
+		if (sports) {
+			const sportsArray = typeof sports === "string" ? sports.split(",") : sports;
+			query.sports = { $in: sportsArray };
+		}
+
+		// Add venue type filter
+		if (venueType && venueType !== "all") {
+			query.venueType = venueType;
+		}
+
+		// Add price range filter
+		// Note: Since prices are stored in courts, not venues,
+		// we would need to join with courts collection for accurate price filtering
+		// For now, we'll skip price filtering or implement it with courts later
+		// if (minPrice || maxPrice) {
+		//   // This would require aggregation pipeline to join with courts
+		// }
+
+		// Add city filter
+		if (city) {
+			query["address.city"] = { $regex: city, $options: "i" };
+		}
+
+		const skip = (Number(page) - 1) * Number(limit);
+
+		const venues = await Venue.find(query)
+			.populate("ownerId", "name")
+			.skip(skip)
+			.limit(Number(limit))
+			.sort({ createdAt: -1 });
+
+		const total = await Venue.countDocuments(query);
+
+		res.json({
+			success: true,
+			venues,
+			totalPages: Math.ceil(total / Number(limit)),
+			currentPage: Number(page),
+			total,
+		});
+	} catch (error: any) {
+		console.error("Get venues error:", error);
+		res.status(error.statusCode || 500).json({
+			success: false,
+			message: error.message || "Failed to fetch venues",
+		});
+	}
+};
+
+/**
+ * Get all approved venues (public endpoint) - DEPRECATED, use getVenues instead
  */
 export const getApprovedVenues = async (req: Request, res: Response) => {
 	try {

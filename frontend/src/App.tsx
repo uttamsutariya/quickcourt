@@ -26,10 +26,15 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import FacilityApproval from "@/pages/admin/FacilityApproval";
 import ComingSoon from "@/pages/ComingSoon";
 
+// Public Pages
+import Landing from "@/pages/Landing";
+import BrowseVenues from "@/pages/BrowseVenues";
+
 // Components
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AppInitializer from "@/components/auth/AppInitializer";
 import AuthGate from "@/components/auth/AuthGate";
+import PublicLayout from "@/components/public/PublicLayout";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import AdminVenueDetails from "./pages/admin/AdminVenueDetails";
@@ -53,19 +58,24 @@ function App() {
 						<AppInitializer>
 							<Router>
 								<Routes>
-									{/* Public Routes */}
-									<Route
-										path="/"
-										element={
-											<AuthGate>
-												<ComingSoon />
-											</AuthGate>
-										}
-									/>
+									{/* Public Routes with Layout */}
+									<Route element={<PublicLayout />}>
+										<Route
+											path="/"
+											element={
+												<AuthGate>
+													<Landing />
+												</AuthGate>
+											}
+										/>
+										<Route path="/venues" element={<BrowseVenues />} />
+										<Route path="/venues/:id" element={<VenueDetails />} />
+									</Route>
+
+									{/* Auth Routes (no layout) */}
 									<Route path="/auth/login" element={<Login />} />
 									<Route path="/auth/role-selection" element={<RoleSelection />} />
 									<Route path="/auth/callback" element={<AuthCallback />} />
-									<Route path="/venues/:id" element={<VenueDetails />} />
 
 									{/* User Routes */}
 									<Route

@@ -83,6 +83,32 @@ class VenueService {
 		const response = await apiClient.get<VenueListResponse>("/venues/approved", { params });
 		return response.data;
 	}
+
+	async getVenues(params?: {
+		page?: number;
+		limit?: number;
+		status?: string;
+		search?: string;
+		sports?: string;
+		venueType?: string;
+		minPrice?: number;
+		maxPrice?: number;
+	}): Promise<any> {
+		const queryParams = new URLSearchParams({
+			page: params?.page?.toString() || "1",
+			limit: params?.limit?.toString() || "10",
+			...(params?.status && { status: params.status }),
+			...(params?.search && { search: params.search }),
+			...(params?.sports && { sports: params.sports }),
+			...(params?.venueType && { venueType: params.venueType }),
+			...(params?.minPrice && { minPrice: params.minPrice.toString() }),
+			...(params?.maxPrice && { maxPrice: params.maxPrice.toString() }),
+		});
+		const response = await apiClient.get(`/venues?${queryParams}`);
+		return response.data;
+	}
 }
 
-export default new VenueService();
+const venueService = new VenueService();
+export { venueService };
+export default venueService;

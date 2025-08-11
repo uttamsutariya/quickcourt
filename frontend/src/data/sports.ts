@@ -1,0 +1,68 @@
+import { Activity, Trophy, Target, Waves, Dumbbell, Users, Zap, Heart } from "lucide-react";
+
+export const popularSports = [
+	{
+		id: "cricket",
+		name: "Cricket",
+		icon: Trophy,
+		bgColor: "bg-green-500/10",
+		iconColor: "text-green-600",
+		description: "Book cricket pitches and nets",
+	},
+	{
+		id: "football",
+		name: "Football",
+		icon: Activity,
+		bgColor: "bg-blue-500/10",
+		iconColor: "text-blue-600",
+		description: "Find football fields near you",
+	},
+	{
+		id: "badminton",
+		name: "Badminton",
+		icon: Target,
+		bgColor: "bg-yellow-500/10",
+		iconColor: "text-yellow-600",
+		description: "Indoor and outdoor courts",
+	},
+	{
+		id: "swimming",
+		name: "Swimming",
+		icon: Waves,
+		bgColor: "bg-cyan-500/10",
+		iconColor: "text-cyan-600",
+		description: "Swimming pools and aquatic centers",
+	},
+	{
+		id: "tennis",
+		name: "Tennis",
+		icon: Zap,
+		bgColor: "bg-purple-500/10",
+		iconColor: "text-purple-600",
+		description: "Professional tennis courts",
+	},
+	{
+		id: "basketball",
+		name: "Basketball",
+		icon: Users,
+		bgColor: "bg-orange-500/10",
+		iconColor: "text-orange-600",
+		description: "Indoor and outdoor basketball courts",
+	},
+	{
+		id: "gym",
+		name: "Gym",
+		icon: Dumbbell,
+		bgColor: "bg-red-500/10",
+		iconColor: "text-red-600",
+		description: "Fitness centers and gyms",
+	},
+	{
+		id: "yoga",
+		name: "Yoga",
+		icon: Heart,
+		bgColor: "bg-pink-500/10",
+		iconColor: "text-pink-600",
+		description: "Yoga studios and wellness centers",
+	},
+];
