@@ -10,6 +10,8 @@ import authRoutes from "./routes/auth.routes";
 import uploadRoutes from "./routes/upload.routes";
 import venueRoutes from "./routes/venue.routes";
 import adminRoutes from "./routes/admin.routes";
+import courtRoutes from "./routes/court.routes";
+import bookingRoutes from "./routes/booking.routes";
 
 // Create Express app
 const app: Application = express();
@@ -51,6 +53,8 @@ app.use(`${config.app.apiPrefix}/auth`, authRoutes);
 app.use(`${config.app.apiPrefix}/upload`, uploadRoutes);
 app.use(`${config.app.apiPrefix}/venues`, venueRoutes);
 app.use(`${config.app.apiPrefix}/admin`, adminRoutes);
+app.use(`${config.app.apiPrefix}/venues/:venueId/courts`, courtRoutes);
+app.use(`${config.app.apiPrefix}/bookings`, bookingRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

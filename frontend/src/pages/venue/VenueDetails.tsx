@@ -33,6 +33,9 @@ import venueService, { type Venue } from "@/services/venue.service";
 import { formatSportLabel } from "@/utils/sport-formatter";
 import useAuthStore from "@/stores/auth-store";
 import { toast } from "sonner";
+import CourtAvailability from "@/components/booking/CourtAvailability";
+import BookingConfirmation from "@/components/booking/BookingConfirmation";
+import type { Court, AvailableSlot } from "@/services/court.service";
 
 // Amenity icons mapping
 const AMENITY_ICONS: Record<string, any> = {
@@ -50,6 +53,12 @@ const VenueDetails = () => {
 	const [deleteDialog, setDeleteDialog] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
+	const [showBookingFlow, setShowBookingFlow] = useState(false);
+	const [bookingDetails, setBookingDetails] = useState<{
+		court: Court;
+		date: Date;
+		slots: AvailableSlot[];
+	} | null>(null);
 
 	useEffect(() => {
 		if (id) {
@@ -244,18 +253,24 @@ const VenueDetails = () => {
 						</CardContent>
 					</Card>
 
-					{/* Courts Section (placeholder) */}
-					<Card>
-						<CardHeader>
-							<CardTitle>Courts & Pricing</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="text-center py-8 text-muted-foreground">
-								<Calendar className="h-12 w-12 mx-auto mb-3" />
-								<p>Court information will be available soon</p>
-							</div>
-						</CardContent>
-					</Card>
+					{/* Show placeholder for non-users */}
+					{(!isEndUser || venue.status !== "approved") && (
+						<Card>
+							<CardHeader>
+								<CardTitle>Courts & Pricing</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="text-center py-8 text-muted-foreground">
+									<Calendar className="h-12 w-12 mx-auto mb-3" />
+									{venue.status !== "approved" ? (
+										<p>This venue is pending approval</p>
+									) : (
+										<p>Login as a user to book courts</p>
+									)}
+								</div>
+							</CardContent>
+						</Card>
+					)}
 				</div>
 
 				{/* Sidebar */}
@@ -277,31 +292,21 @@ const VenueDetails = () => {
 						</CardContent>
 					</Card>
 
-					{/* Operating Hours (placeholder) */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-lg">Operating Hours</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="space-y-2 text-sm">
-								<div className="flex justify-between">
-									<span>Monday - Friday</span>
-									<span className="text-muted-foreground">6:00 AM - 10:00 PM</span>
-								</div>
-								<div className="flex justify-between">
-									<span>Saturday - Sunday</span>
-									<span className="text-muted-foreground">7:00 AM - 11:00 PM</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
 					{/* Action Button */}
 					{isEndUser && venue.status === "approved" && (
 						<Button
-							className="w-full gradient-primary text-primary-foreground"
+							className="w-full gradient-primary text-primary-foreground cursor-pointer"
 							size="lg"
-							onClick={() => toast.info("Booking feature coming soon!")}
+							onClick={() => {
+								if (!user) {
+									toast.info("Please login to book a court");
+									navigate("/auth/login");
+								} else {
+									setShowBookingFlow(true);
+									// Scroll to booking section
+									document.querySelector(".booking-section")?.scrollIntoView({ behavior: "smooth" });
+								}
+							}}
 						>
 							<Calendar className="mr-2 h-5 w-5" />
 							Book Now
@@ -399,6 +404,22 @@ const VenueDetails = () => {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
+
+			{/* Booking Confirmation Dialog */}
+			{bookingDetails && venue && (
+				<BookingConfirmation
+					open={!!bookingDetails}
+					onClose={() => setBookingDetails(null)}
+					venue={venue}
+					court={bookingDetails.court}
+					date={bookingDetails.date}
+					slots={bookingDetails.slots}
+					onSuccess={() => {
+						setBookingDetails(null);
+						setShowBookingFlow(false);
+					}}
+				/>
+			)}
 		</div>
 	);
 };

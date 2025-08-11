@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2, Settings, Building2, Activity, IndianRupee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageUpload from "@/components/owner/ImageUpload";
+import CourtManagement from "@/components/courts/CourtManagement";
 import venueService, { type Venue } from "@/services/venue.service";
+import { type Court } from "@/services/court.service";
 import { toast } from "sonner";
 
 // Map display names to backend enum values
@@ -52,6 +54,9 @@ const EditVenue = () => {
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
+	const [showCourtManagement, setShowCourtManagement] = useState(false);
+	const [venue, setVenue] = useState<Venue | null>(null);
+	const [courts, setCourts] = useState<Court[]>([]);
 	const [formData, setFormData] = useState<Partial<Venue>>({
 		name: "",
 		description: "",
@@ -77,6 +82,7 @@ const EditVenue = () => {
 		try {
 			setLoading(true);
 			const response = await venueService.getVenueById(id!);
+			setVenue(response.venue);
 			setFormData(response.venue);
 		} catch (error: any) {
 			console.error("Fetch venue error:", error);
@@ -119,7 +125,7 @@ const EditVenue = () => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		
+
 		// Validate form
 		if (!formData.name?.trim()) {
 			toast.error("Venue name is required");
@@ -145,6 +151,16 @@ const EditVenue = () => {
 		} finally {
 			setSaving(false);
 		}
+	};
+
+	// Get court statistics
+	const getCourtStats = () => {
+		const totalCourts = courts.length;
+		const sportsCount = [...new Set(courts.map((c) => c.sportType))].length;
+		const avgPrice =
+			courts.length > 0 ? Math.round(courts.reduce((sum, c) => sum + (c.defaultPrice || 0), 0) / courts.length) : 0;
+
+		return { totalCourts, sportsCount, avgPrice };
 	};
 
 	if (loading) {
@@ -340,6 +356,60 @@ const EditVenue = () => {
 					</CardContent>
 				</Card>
 
+				{/* Courts Management */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Courts</CardTitle>
+						<CardDescription>
+							Manage courts for your venue. Each court can have its own schedule and pricing.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						{/* Court Statistics */}
+						{courts.length > 0 && (
+							<div className="grid grid-cols-3 gap-3">
+								<div className="bg-muted/50 rounded-lg p-3 text-center">
+									<div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+										<Building2 className="h-4 w-4" />
+										<span className="text-xs">Total Courts</span>
+									</div>
+									<p className="text-xl font-semibold">{getCourtStats().totalCourts}</p>
+								</div>
+								<div className="bg-muted/50 rounded-lg p-3 text-center">
+									<div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+										<Activity className="h-4 w-4" />
+										<span className="text-xs">Sports</span>
+									</div>
+									<p className="text-xl font-semibold">{getCourtStats().sportsCount}</p>
+								</div>
+								<div className="bg-muted/50 rounded-lg p-3 text-center">
+									<div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+										<IndianRupee className="h-4 w-4" />
+										<span className="text-xs">Avg. Price</span>
+									</div>
+									<p className="text-xl font-semibold">₹{getCourtStats().avgPrice}</p>
+								</div>
+							</div>
+						)}
+
+						<Button
+							type="button"
+							variant="outline"
+							className="w-full"
+							onClick={() => setShowCourtManagement(true)}
+							disabled={!formData.sports || formData.sports.length === 0}
+						>
+							<Settings className="mr-2 h-4 w-4" />
+							Manage Courts
+						</Button>
+						{(!formData.sports || formData.sports.length === 0) && (
+							<p className="text-sm text-muted-foreground mt-2 text-center">
+								Please select at least one sport before adding courts
+							</p>
+						)}
+					</CardContent>
+				</Card>
+
 				{/* Images */}
 				<Card>
 					<CardHeader>
@@ -374,6 +444,16 @@ const EditVenue = () => {
 					</Button>
 				</div>
 			</form>
+
+			{/* Court Management Dialog */}
+			{venue && (
+				<CourtManagement
+					open={showCourtManagement}
+					onClose={() => setShowCourtManagement(false)}
+					venue={venue}
+					onCourtsUpdate={setCourts}
+				/>
+			)}
 		</div>
 	);
 };

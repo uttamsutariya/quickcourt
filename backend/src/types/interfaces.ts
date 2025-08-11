@@ -95,6 +95,11 @@ export interface IBooking extends Document {
 	paymentSimulated: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+	// Instance methods
+	canBeCancelled(): boolean;
+	cancel(reason?: string): Promise<void>;
+	markAsCompleted(): Promise<void>;
+	calculateEndTime(): string;
 }
 
 // Court Unavailability Interface
@@ -123,6 +128,10 @@ export interface IAdminSettings extends Document {
 	cancellationMinHours: number; // Minimum hours before cancellation (2-3 hours)
 	createdAt: Date;
 	updatedAt: Date;
+	// Instance methods
+	isBookingDateAllowed(date: Date): boolean;
+	calculateCommission(amount: number): number;
+	calculateOwnerEarnings(amount: number): number;
 }
 
 // Helper interface for available slots (not a DB model)
