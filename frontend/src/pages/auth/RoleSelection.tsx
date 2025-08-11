@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { User, Building2, Trophy, ArrowRight, CheckCircle } from "lucide-react";
+import { User, Building2, Trophy, ArrowRight, CheckCircle, Sparkles } from "lucide-react";
 import useAuthStore from "@/stores/auth-store";
 import { USER_ROLES } from "@/config/constants";
 import { useAuth } from "@workos-inc/authkit-react";
+import { cn } from "@/lib/utils";
 
 const RoleSelection = () => {
 	const navigate = useNavigate();
@@ -34,7 +35,12 @@ const RoleSelection = () => {
 				"Cancel bookings easily",
 				"Discover new venues",
 			],
-			gradient: "gradient-primary",
+			bgGradient:
+				"from-primary/10 via-primary/5 to-transparent dark:from-primary/20 dark:via-primary/10 dark:to-transparent",
+			iconBg: "bg-primary/10 dark:bg-primary/20",
+			iconColor: "text-primary",
+			buttonClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
+			borderHover: "hover:border-primary/50 dark:hover:border-primary/40",
 			buttonText: "Sign up as Player",
 		},
 		{
@@ -49,15 +55,27 @@ const RoleSelection = () => {
 				"Track bookings and revenue",
 				"Handle maintenance schedules",
 			],
-			gradient: "gradient-secondary",
+			bgGradient:
+				"from-blue-500/10 via-blue-500/5 to-transparent dark:from-blue-500/20 dark:via-blue-500/10 dark:to-transparent",
+			iconBg: "bg-blue-500/10 dark:bg-blue-500/20",
+			iconColor: "text-blue-600 dark:text-blue-500",
+			buttonClass: "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white",
+			borderHover: "hover:border-blue-500/50 dark:hover:border-blue-500/40",
 			buttonText: "Sign up as Owner",
 		},
 	];
 
 	return (
-		<div className="min-h-screen bg-background flex flex-col">
+		<div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+			{/* Background Decorative Elements */}
+			<div className="absolute inset-0 overflow-hidden">
+				<div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl animate-pulse" />
+				<div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/5 dark:bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
+				<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 dark:bg-primary/5 rounded-full blur-3xl animate-pulse delay-500" />
+			</div>
+
 			{/* Header */}
-			<div className="p-6">
+			<div className="p-6 relative z-10">
 				<div className="max-w-7xl mx-auto flex items-center justify-between">
 					<div className="flex items-center space-x-2">
 						<Trophy className="h-8 w-8 text-primary" />
@@ -65,7 +83,11 @@ const RoleSelection = () => {
 					</div>
 					<div className="flex items-center gap-2">
 						<ThemeToggle />
-						<Button variant="ghost" onClick={() => navigate("/auth/login")}>
+						<Button
+							variant="ghost"
+							onClick={() => navigate("/auth/login")}
+							className="text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+						>
 							Already have an account? Sign in
 						</Button>
 					</div>
@@ -73,33 +95,48 @@ const RoleSelection = () => {
 			</div>
 
 			{/* Main Content */}
-			<div className="flex-1 flex items-center justify-center p-6">
+			<div className="flex-1 flex items-center justify-center p-6 relative z-10">
 				<div className="w-full max-w-5xl">
+					{/* Header Section */}
 					<div className="text-center mb-12 animate-slide-up">
+						<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 mb-6">
+							<Sparkles className="h-4 w-4 text-primary animate-pulse" />
+							<span className="text-sm font-medium">Get started in seconds</span>
+						</div>
 						<h1 className="text-4xl md:text-5xl font-bold mb-4">Choose Your Role</h1>
 						<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
 							Select how you want to use QuickCourt. You can always switch between roles later.
 						</p>
 					</div>
 
+					{/* Role Cards */}
 					<div className="grid md:grid-cols-2 gap-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
 						{roles.map((role, index) => (
 							<Card
 								key={role.id}
-								className="relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-xl cursor-pointer group"
+								className={cn(
+									"relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl cursor-pointer group",
+									"border-border/50 hover:border-border hover:-translate-y-1",
+									role.borderHover,
+								)}
 								onClick={() =>
 									handleRoleSelection(role.id as typeof USER_ROLES.USER | typeof USER_ROLES.FACILITY_OWNER)
 								}
 								style={{ animationDelay: `${0.3 + index * 0.1}s` }}
 							>
-								<div className={`absolute inset-0 opacity-5 ${role.gradient}`} />
+								{/* Gradient Background */}
+								<div className={cn("absolute inset-0 bg-gradient-to-br", role.bgGradient)} />
 
 								<CardHeader className="relative">
 									<div className="flex items-start justify-between mb-4">
-										<div className={`p-3 rounded-xl ${role.gradient} text-white`}>
-											<role.icon className="h-6 w-6" />
+										<div className={cn("p-3 rounded-xl backdrop-blur-sm", role.iconBg)}>
+											<role.icon className={cn("h-6 w-6", role.iconColor)} />
 										</div>
-										{role.id === USER_ROLES.FACILITY_OWNER && <Badge variant="secondary">Business</Badge>}
+										{role.id === USER_ROLES.FACILITY_OWNER && (
+											<Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-500 border-blue-500/20">
+												Business
+											</Badge>
+										)}
 									</div>
 
 									<CardTitle className="text-2xl mb-2">{role.title}</CardTitle>
@@ -110,14 +147,20 @@ const RoleSelection = () => {
 									<div className="space-y-3">
 										{role.features.map((feature, idx) => (
 											<div key={idx} className="flex items-start space-x-3">
-												<CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+												<div className={cn("mt-0.5 flex-shrink-0 rounded-full p-0.5", role.iconBg)}>
+													<CheckCircle className={cn("h-4 w-4", role.iconColor)} />
+												</div>
 												<span className="text-sm text-muted-foreground">{feature}</span>
 											</div>
 										))}
 									</div>
 
 									<Button
-										className={`w-full ${role.gradient} text-white hover:opacity-90 transition-opacity group-hover:scale-[1.02] transition-transform`}
+										className={cn(
+											"w-full shadow-lg transition-all duration-300",
+											"group-hover:scale-[1.02] group-hover:shadow-xl",
+											role.buttonClass,
+										)}
 										size="lg"
 									>
 										<span>{role.buttonText}</span>
@@ -128,19 +171,26 @@ const RoleSelection = () => {
 						))}
 					</div>
 
+					{/* Footer */}
 					<div
 						className="mt-12 text-center text-sm text-muted-foreground animate-fade-in"
 						style={{ animationDelay: "0.5s" }}
 					>
 						<p>
 							By signing up, you agree to our{" "}
-							<a href="#" className="text-primary hover:underline">
+							<button
+								className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
+								onClick={(e) => e.stopPropagation()}
+							>
 								Terms of Service
-							</a>{" "}
+							</button>{" "}
 							and{" "}
-							<a href="#" className="text-primary hover:underline">
+							<button
+								className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
+								onClick={(e) => e.stopPropagation()}
+							>
 								Privacy Policy
-							</a>
+							</button>
 						</p>
 					</div>
 				</div>
