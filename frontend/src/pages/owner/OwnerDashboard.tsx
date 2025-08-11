@@ -208,23 +208,6 @@ const OwnerDashboard = () => {
 
 			{/* Recent Activity */}
 			<div className="grid gap-6 md:grid-cols-2">
-				{/* Recent Bookings */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Recent Bookings</CardTitle>
-						<CardDescription>Latest bookings from your venues</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="flex items-center justify-center py-8 text-muted-foreground">
-							<div className="text-center">
-								<Clock className="h-12 w-12 mx-auto mb-3" />
-								<p>No recent bookings</p>
-								<p className="text-xs mt-2">Bookings will appear here once courts are set up</p>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-
 				{/* Revenue Trend */}
 				<Card>
 					<CardHeader>

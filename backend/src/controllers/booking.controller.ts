@@ -208,6 +208,82 @@ export const getVenueBookings = async (req: Request, res: Response, next: NextFu
 	}
 };
 
+// Get all bookings for owner's venues
+export const getOwnerBookings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+	try {
+		const { status, timeFilter, venueId } = req.query;
+
+		// Check if user is facility owner
+		if (req.user.role !== "facility_owner") {
+			throw new AppError("Only facility owners can access this endpoint", 403);
+		}
+
+		// Get all venues owned by this user
+		const ownerVenues = await Venue.find({
+			ownerId: req.user._id,
+			isActive: true,
+		}).select("_id name");
+
+		if (!ownerVenues || ownerVenues.length === 0) {
+			res.status(200).json({
+				success: true,
+				bookings: [],
+				venues: [],
+			});
+			return;
+		}
+
+		// Build query
+		const venueIds = ownerVenues.map((v) => v._id);
+		const query: any = {};
+
+		// Filter by specific venue or all owner's venues
+		if (venueId && venueIds.some((id: any) => id.toString() === venueId)) {
+			query.venueId = venueId;
+		} else {
+			query.venueId = { $in: venueIds };
+		}
+
+		// Status filter
+		if (status && status !== "all") {
+			query.status = status;
+		}
+
+		// Time filter (upcoming, past, today)
+		const now = new Date();
+		const today = new Date(now.setHours(0, 0, 0, 0));
+		const tomorrow = new Date(today);
+		tomorrow.setDate(tomorrow.getDate() + 1);
+
+		if (timeFilter === "upcoming") {
+			query.bookingDate = { $gte: tomorrow };
+			query.status = BookingStatus.CONFIRMED;
+		} else if (timeFilter === "past") {
+			query.bookingDate = { $lt: today };
+		} else if (timeFilter === "today") {
+			query.bookingDate = {
+				$gte: today,
+				$lt: tomorrow,
+			};
+		}
+
+		// Fetch bookings with populated data
+		const bookings = await Booking.find(query)
+			.sort({ bookingDate: -1, startTime: -1 })
+			.populate("userId", "name email phoneNumber")
+			.populate("courtId", "name sportType")
+			.populate("venueId", "name address");
+
+		res.status(200).json({
+			success: true,
+			bookings,
+			venues: ownerVenues,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 // Get booking details
 export const getBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
 	try {
