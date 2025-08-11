@@ -27,6 +27,7 @@ import FacilityApproval from "@/pages/admin/FacilityApproval";
 import ComingSoon from "@/pages/ComingSoon";
 import UserDashboard from "@/pages/user/UserDashboard";
 import UserBookings from "@/pages/user/UserBookings";
+import Profile from "@/pages/shared/Profile";
 
 // Public Pages
 import Landing from "@/pages/Landing";
@@ -82,7 +83,7 @@ function App() {
 									>
 										<Route path="dashboard" element={<UserDashboard />} />
 										<Route path="bookings" element={<UserBookings />} />
-										<Route path="settings" element={<ComingSoon />} />
+										<Route path="profile" element={<Profile />} />
 										<Route index element={<Navigate to="/user/dashboard" replace />} />
 									</Route>
 
@@ -101,7 +102,7 @@ function App() {
 										<Route path="venues/:id" element={<VenueDetails />} />
 										<Route path="venues/:id/edit" element={<EditVenue />} />
 										<Route path="bookings" element={<ComingSoon />} />
-										<Route path="settings" element={<ComingSoon />} />
+										<Route path="profile" element={<Profile />} />
 										<Route index element={<Navigate to="/owner/dashboard" replace />} />
 									</Route>
 
@@ -119,6 +120,7 @@ function App() {
 										<Route path="venues/:id" element={<AdminVenueDetails />} />
 										<Route path="users" element={<ComingSoon />} />
 										<Route path="bookings" element={<ComingSoon />} />
+										<Route path="profile" element={<Profile />} />
 										<Route index element={<Navigate to="/admin/dashboard" replace />} />
 									</Route>
 

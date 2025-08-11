@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Settings, User, ChevronDown, LayoutDashboard, Building2, Shield } from "lucide-react";
+import { LogOut, User, ChevronDown, LayoutDashboard, Building2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
@@ -99,20 +99,20 @@ const Navbar = () => {
 										<span>Dashboard</span>
 									</DropdownMenuItem>
 
-									{/* Settings Link */}
+									{/* Profile Link */}
 									<DropdownMenuItem
 										onClick={() => {
-											const settingsPath =
+											const profilePath =
 												user.role === USER_ROLES.FACILITY_OWNER
-													? "/owner/settings"
+													? "/owner/profile"
 													: user.role === USER_ROLES.ADMIN
-													? "/admin/settings"
-													: "/user/settings";
-											navigate(settingsPath);
+													? "/admin/profile"
+													: "/user/profile";
+											navigate(profilePath);
 										}}
 									>
-										<Settings className="mr-2 h-4 w-4" />
-										<span>Settings</span>
+										<User className="mr-2 h-4 w-4" />
+										<span>Profile</span>
 									</DropdownMenuItem>
 
 									<DropdownMenuSeparator />
