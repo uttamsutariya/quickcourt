@@ -25,6 +25,8 @@ import VenueDetails from "@/pages/venue/VenueDetails";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import FacilityApproval from "@/pages/admin/FacilityApproval";
 import ComingSoon from "@/pages/ComingSoon";
+import UserDashboard from "@/pages/user/UserDashboard";
+import UserBookings from "@/pages/user/UserBookings";
 
 // Public Pages
 import Landing from "@/pages/Landing";
@@ -33,7 +35,6 @@ import BrowseVenues from "@/pages/BrowseVenues";
 // Components
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AppInitializer from "@/components/auth/AppInitializer";
-import AuthGate from "@/components/auth/AuthGate";
 import PublicLayout from "@/components/public/PublicLayout";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -60,14 +61,7 @@ function App() {
 								<Routes>
 									{/* Public Routes with Layout */}
 									<Route element={<PublicLayout />}>
-										<Route
-											path="/"
-											element={
-												<AuthGate>
-													<Landing />
-												</AuthGate>
-											}
-										/>
+										<Route path="/" element={<Landing />} />
 										<Route path="/venues" element={<BrowseVenues />} />
 										<Route path="/venues/:id" element={<VenueDetails />} />
 									</Route>
@@ -86,8 +80,8 @@ function App() {
 											</ProtectedRoute>
 										}
 									>
-										<Route path="dashboard" element={<ComingSoon />} />
-										<Route path="bookings" element={<ComingSoon />} />
+										<Route path="dashboard" element={<UserDashboard />} />
+										<Route path="bookings" element={<UserBookings />} />
 										<Route path="settings" element={<ComingSoon />} />
 										<Route index element={<Navigate to="/user/dashboard" replace />} />
 									</Route>
