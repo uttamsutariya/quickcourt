@@ -333,8 +333,13 @@ export const getOwnerDashboardStats = async (req: Request, res: Response, next: 
 		const completedBookings = bookings.filter((b) => b.status === BookingStatus.COMPLETED);
 		const cancelledBookings = bookings.filter((b) => b.status === BookingStatus.CANCELLED);
 
-		// Calculate earnings (completed bookings only)
-		const totalRevenue = completedBookings.reduce((sum, booking) => sum + booking.totalAmount, 0);
+		// Calculate earnings (from confirmed and completed bookings)
+		// Business logic: Payment is simulated and done at booking time, so CONFIRMED bookings are already paid
+		// CANCELLED bookings: No refunds are processed, but we don't count them in new earnings
+		const paidBookings = bookings.filter(
+			(b) => b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.COMPLETED,
+		);
+		const totalRevenue = paidBookings.reduce((sum, booking) => sum + booking.totalAmount, 0);
 		const adminCommission = totalRevenue * 0.1; // 10% admin commission
 		const netEarnings = totalRevenue - adminCommission;
 
@@ -345,7 +350,7 @@ export const getOwnerDashboardStats = async (req: Request, res: Response, next: 
 			return bookingDate >= thisMonthStart && b.status !== BookingStatus.CANCELLED;
 		});
 
-		const thisMonthRevenue = completedBookings
+		const thisMonthRevenue = paidBookings
 			.filter((b) => new Date(b.bookingDate) >= thisMonthStart)
 			.reduce((sum, booking) => sum + booking.totalAmount, 0);
 		const thisMonthNetEarnings = thisMonthRevenue * 0.9; // After 10% commission
