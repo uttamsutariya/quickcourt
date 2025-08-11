@@ -33,9 +33,7 @@ import venueService, { type Venue } from "@/services/venue.service";
 import { formatSportLabel } from "@/utils/sport-formatter";
 import useAuthStore from "@/stores/auth-store";
 import { toast } from "sonner";
-import CourtAvailability from "@/components/booking/CourtAvailability";
-import BookingConfirmation from "@/components/booking/BookingConfirmation";
-import type { Court, AvailableSlot } from "@/services/court.service";
+import BookingModal from "@/components/booking/BookingModal";
 
 // Amenity icons mapping
 const AMENITY_ICONS: Record<string, any> = {
@@ -53,12 +51,7 @@ const VenueDetails = () => {
 	const [deleteDialog, setDeleteDialog] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
-	const [showBookingFlow, setShowBookingFlow] = useState(false);
-	const [bookingDetails, setBookingDetails] = useState<{
-		court: Court;
-		date: Date;
-		slots: AvailableSlot[];
-	} | null>(null);
+	const [showBookingModal, setShowBookingModal] = useState(false);
 
 	useEffect(() => {
 		if (id) {
@@ -252,25 +245,6 @@ const VenueDetails = () => {
 							</div>
 						</CardContent>
 					</Card>
-
-					{/* Show placeholder for non-users */}
-					{(!isEndUser || venue.status !== "approved") && (
-						<Card>
-							<CardHeader>
-								<CardTitle>Courts & Pricing</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="text-center py-8 text-muted-foreground">
-									<Calendar className="h-12 w-12 mx-auto mb-3" />
-									{venue.status !== "approved" ? (
-										<p>This venue is pending approval</p>
-									) : (
-										<p>Login as a user to book courts</p>
-									)}
-								</div>
-							</CardContent>
-						</Card>
-					)}
 				</div>
 
 				{/* Sidebar */}
@@ -297,16 +271,7 @@ const VenueDetails = () => {
 						<Button
 							className="w-full gradient-primary text-primary-foreground cursor-pointer"
 							size="lg"
-							onClick={() => {
-								if (!user) {
-									toast.info("Please login to book a court");
-									navigate("/auth/login");
-								} else {
-									setShowBookingFlow(true);
-									// Scroll to booking section
-									document.querySelector(".booking-section")?.scrollIntoView({ behavior: "smooth" });
-								}
-							}}
+							onClick={() => setShowBookingModal(true)}
 						>
 							<Calendar className="mr-2 h-5 w-5" />
 							Book Now
@@ -405,21 +370,8 @@ const VenueDetails = () => {
 				</DialogContent>
 			</Dialog>
 
-			{/* Booking Confirmation Dialog */}
-			{bookingDetails && venue && (
-				<BookingConfirmation
-					open={!!bookingDetails}
-					onClose={() => setBookingDetails(null)}
-					venue={venue}
-					court={bookingDetails.court}
-					date={bookingDetails.date}
-					slots={bookingDetails.slots}
-					onSuccess={() => {
-						setBookingDetails(null);
-						setShowBookingFlow(false);
-					}}
-				/>
-			)}
+			{/* Booking Modal */}
+			{venue && <BookingModal open={showBookingModal} onClose={() => setShowBookingModal(false)} venue={venue} />}
 		</div>
 	);
 };

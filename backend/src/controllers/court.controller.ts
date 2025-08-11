@@ -12,7 +12,7 @@ export const getCourtsByVenue = async (req: Request, res: Response, next: NextFu
 	try {
 		const { venueId } = req.params;
 
-		// Verify venue exists and user has access
+		// Verify venue exists
 		const venue = await Venue.findById(venueId);
 		if (!venue || !venue.isActive) {
 			throw new AppError("Venue not found", 404);
@@ -21,12 +21,25 @@ export const getCourtsByVenue = async (req: Request, res: Response, next: NextFu
 		// Check if user is owner or admin
 		const isOwner = venue.ownerId.toString() === req.user._id.toString();
 		const isAdmin = req.user.role === "admin";
+		const isEndUser = req.user.role === "user";
 
-		if (!isOwner && !isAdmin) {
-			throw new AppError("You do not have permission to manage this venue", 403);
+		// For approved venues, allow public/user access to view courts (for booking)
+		// For pending/rejected venues, only owner/admin can view
+		if (venue.status !== "approved" && !isOwner && !isAdmin) {
+			throw new AppError("You do not have permission to view courts for this venue", 403);
 		}
 
-		const courts = await Court.findByVenue(new mongoose.Types.ObjectId(venueId));
+		// If it's an end user viewing an approved venue, only show active courts
+		// Owners and admins can see all courts (including inactive)
+		let courts;
+		if (isEndUser && venue.status === "approved") {
+			courts = await Court.find({
+				venueId: new mongoose.Types.ObjectId(venueId),
+				isActive: true,
+			});
+		} else {
+			courts = await Court.findByVenue(new mongoose.Types.ObjectId(venueId));
+		}
 
 		res.status(200).json({
 			success: true,
@@ -220,7 +233,7 @@ export const deleteCourt = async (req: Request, res: Response, next: NextFunctio
 export const getCourtAvailability = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const { courtId } = req.params;
-		const { startDate, endDate, days = 3 } = req.query;
+		const { startDate, days = 3 } = req.query;
 
 		const court = await Court.findById(courtId);
 		if (!court || !court.isActive) {
@@ -391,7 +404,7 @@ function validateSlotConfigurations(configurations: any[]) {
 
 		// Validate time constraints
 		if (config.isOpen) {
-			const [hours, minutes] = config.startTime.split(":").map(Number);
+			const [hours] = config.startTime.split(":").map(Number);
 			const totalHours = config.slotDuration * config.numberOfSlots;
 			const endHour = hours + totalHours;
 
