@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Building2, CheckCircle, Clock, XCircle, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import useAuthStore from "@/stores/auth-store";
 import { toast } from "sonner";
 import apiClient from "@/lib/api-client";
 
@@ -17,7 +16,6 @@ interface AdminStats {
 
 const AdminDashboard = () => {
 	const navigate = useNavigate();
-	const { user } = useAuthStore();
 	const [stats, setStats] = useState<AdminStats | null>(null);
 	const [loading, setLoading] = useState(true);
 

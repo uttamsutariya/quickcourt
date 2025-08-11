@@ -1,13 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Calendar, MapPin, Trophy, Clock, Star, TrendingUp } from "lucide-react";
-import useAuthStore from "@/stores/auth-store";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, Calendar, MapPin, Trophy, Star } from "lucide-react";
 import { useEffect } from "react";
 
 const UserDashboard = () => {
 	const navigate = useNavigate();
-	const { user } = useAuthStore();
 
 	// Quick action cards
 	const quickActions = [

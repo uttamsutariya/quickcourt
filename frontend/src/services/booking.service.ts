@@ -148,7 +148,7 @@ class BookingService {
 		});
 
 		// Sort bookings within each date by start time
-		grouped.forEach((bookings, date) => {
+		grouped.forEach((bookings) => {
 			bookings.sort((a, b) => a.startTime.localeCompare(b.startTime));
 		});
 
