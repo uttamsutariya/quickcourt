@@ -19,20 +19,14 @@ interface CompactVenueCardProps {
 		averageRating?: number;
 		totalReviews?: number;
 		venueType?: "indoor" | "outdoor" | "both";
-		courts?: Array<{
-			defaultPrice: number;
-			sportType: string;
-		}>;
+		startingPrice?: number | null;
+		courtCount?: number;
 	};
 	className?: string;
 }
 
 const CompactVenueCard = ({ venue, className }: CompactVenueCardProps) => {
 	const navigate = useNavigate();
-
-	// Get minimum price from courts if available
-	const minPrice =
-		venue.courts && venue.courts.length > 0 ? Math.min(...venue.courts.map((c) => c.defaultPrice)) : null;
 
 	const handleViewDetails = () => {
 		navigate(`/venues/${venue._id}`);
@@ -65,21 +59,16 @@ const CompactVenueCard = ({ venue, className }: CompactVenueCardProps) => {
 					</div>
 				)}
 
-				{/* Top Badges */}
-				<div className="absolute top-2 left-2 flex gap-1.5">
-					{venue.venueType && (
-						<div className="px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs font-medium">
-							{venue.venueType === "both" ? "Indoor & Outdoor" : venue.venueType}
-						</div>
-					)}
-				</div>
-
 				{/* Price Badge */}
-				{minPrice && (
+				{venue.startingPrice && (
 					<div className="absolute top-2 right-2">
-						<div className="px-2 py-1 rounded-lg bg-primary text-primary-foreground text-sm font-bold flex items-center gap-1">
-							<IndianRupee className="h-3 w-3" />
-							{minPrice}
+						<div className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground shadow-lg">
+							<div className="flex items-center gap-1">
+								<IndianRupee className="h-3 w-3" />
+								<span className="text-sm font-bold">{venue.startingPrice}</span>
+								<span className="text-xs opacity-90">/hr</span>
+							</div>
+							<div className="text-[10px] opacity-80">Starting from</div>
 						</div>
 					</div>
 				)}

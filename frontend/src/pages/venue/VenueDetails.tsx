@@ -18,6 +18,7 @@ import {
 	Home,
 	Trees,
 	Building2,
+	IndianRupee,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -265,6 +266,18 @@ const VenueDetails = () => {
 									);
 								})()}
 							</div>
+
+							{venue.startingPrice && (
+								<div>
+									<h3 className="font-semibold mb-2">Starting Price</h3>
+									<div className="flex items-center gap-2">
+										<IndianRupee className="h-5 w-5 text-primary" />
+										<span className="text-2xl font-bold text-primary">₹{venue.startingPrice}</span>
+										<span className="text-muted-foreground">per hour</span>
+									</div>
+									<p className="text-sm text-muted-foreground mt-1">Prices may vary based on court and time slot</p>
+								</div>
+							)}
 
 							<div>
 								<h3 className="font-semibold mb-2">Sports Available</h3>

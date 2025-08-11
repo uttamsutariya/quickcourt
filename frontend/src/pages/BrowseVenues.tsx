@@ -7,10 +7,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
 import CompactVenueCard from "@/components/venue/CompactVenueCard";
 import { venueService } from "@/services/venue.service";
 import { toast } from "sonner";
-import { Search, Filter, MapPin, IndianRupee, X, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Search, Filter, MapPin, X, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { popularSports } from "@/data/sports";
 
 interface Filters {
@@ -252,45 +253,31 @@ const BrowseVenues = () => {
 
 									{/* Price Range Filter */}
 									<div className="space-y-3">
-										<Label>Price Range (per hour)</Label>
-										<div className="flex items-center gap-2">
-											<div className="flex-1">
-												<div className="flex items-center gap-1">
-													<IndianRupee className="h-4 w-4 text-muted-foreground" />
-													<Input
-														type="number"
-														placeholder="Min"
-														value={tempFilters.minPrice}
-														onChange={(e) =>
-															setTempFilters({
-																...tempFilters,
-																minPrice: parseInt(e.target.value) || 0,
-															})
-														}
-														min="0"
-														max="5000"
-													/>
-												</div>
-											</div>
-											<span className="text-muted-foreground">-</span>
-											<div className="flex-1">
-												<div className="flex items-center gap-1">
-													<IndianRupee className="h-4 w-4 text-muted-foreground" />
-													<Input
-														type="number"
-														placeholder="Max"
-														value={tempFilters.maxPrice}
-														onChange={(e) =>
-															setTempFilters({
-																...tempFilters,
-																maxPrice: parseInt(e.target.value) || 5000,
-															})
-														}
-														min="0"
-														max="5000"
-													/>
-												</div>
-											</div>
+										<div className="flex items-center justify-between">
+											<Label>Price Range (per hour)</Label>
+											<span className="text-sm text-muted-foreground">
+												₹{tempFilters.minPrice} - ₹{tempFilters.maxPrice}
+											</span>
+										</div>
+										<div className="px-1">
+											<Slider
+												value={[tempFilters.minPrice, tempFilters.maxPrice]}
+												onValueChange={(values) =>
+													setTempFilters({
+														...tempFilters,
+														minPrice: values[0],
+														maxPrice: values[1],
+													})
+												}
+												max={5000}
+												min={0}
+												step={100}
+												className="w-full"
+											/>
+										</div>
+										<div className="flex items-center justify-between text-xs text-muted-foreground">
+											<span>₹0</span>
+											<span>₹5000</span>
 										</div>
 									</div>
 
@@ -339,6 +326,11 @@ const BrowseVenues = () => {
 												</Badge>
 											))}
 											{filters.venueType !== "all" && <Badge variant="secondary">{filters.venueType}</Badge>}
+											{(filters.minPrice > 0 || filters.maxPrice < 5000) && (
+												<Badge variant="secondary">
+													₹{filters.minPrice} - ₹{filters.maxPrice}
+												</Badge>
+											)}
 										</div>
 									</div>
 								)}
@@ -489,45 +481,31 @@ const BrowseVenues = () => {
 
 							{/* Price Range Filter */}
 							<div className="space-y-3">
-								<Label>Price Range (per hour)</Label>
-								<div className="flex items-center gap-2">
-									<div className="flex-1">
-										<div className="flex items-center gap-1">
-											<IndianRupee className="h-4 w-4 text-muted-foreground" />
-											<Input
-												type="number"
-												placeholder="Min"
-												value={tempFilters.minPrice}
-												onChange={(e) =>
-													setTempFilters({
-														...tempFilters,
-														minPrice: parseInt(e.target.value) || 0,
-													})
-												}
-												min="0"
-												max="5000"
-											/>
-										</div>
-									</div>
-									<span className="text-muted-foreground">-</span>
-									<div className="flex-1">
-										<div className="flex items-center gap-1">
-											<IndianRupee className="h-4 w-4 text-muted-foreground" />
-											<Input
-												type="number"
-												placeholder="Max"
-												value={tempFilters.maxPrice}
-												onChange={(e) =>
-													setTempFilters({
-														...tempFilters,
-														maxPrice: parseInt(e.target.value) || 5000,
-													})
-												}
-												min="0"
-												max="5000"
-											/>
-										</div>
-									</div>
+								<div className="flex items-center justify-between">
+									<Label>Price Range (per hour)</Label>
+									<span className="text-sm text-muted-foreground">
+										₹{tempFilters.minPrice} - ₹{tempFilters.maxPrice}
+									</span>
+								</div>
+								<div className="px-1">
+									<Slider
+										value={[tempFilters.minPrice, tempFilters.maxPrice]}
+										onValueChange={(values) =>
+											setTempFilters({
+												...tempFilters,
+												minPrice: values[0],
+												maxPrice: values[1],
+											})
+										}
+										max={5000}
+										min={0}
+										step={100}
+										className="w-full"
+									/>
+								</div>
+								<div className="flex items-center justify-between text-xs text-muted-foreground">
+									<span>₹0</span>
+									<span>₹5000</span>
 								</div>
 							</div>
 

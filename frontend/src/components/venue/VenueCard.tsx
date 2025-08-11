@@ -22,10 +22,8 @@ interface VenueCardProps {
 		averageRating?: number;
 		totalReviews?: number;
 		venueType?: "indoor" | "outdoor" | "both";
-		courts?: Array<{
-			defaultPrice: number;
-			sportType: string;
-		}>;
+		startingPrice?: number | null;
+		courtCount?: number;
 	};
 	className?: string;
 	showDescription?: boolean;
@@ -33,10 +31,6 @@ interface VenueCardProps {
 
 const VenueCard = ({ venue, className, showDescription = false }: VenueCardProps) => {
 	const navigate = useNavigate();
-
-	// Get minimum price from courts if available
-	const minPrice =
-		venue.courts && venue.courts.length > 0 ? Math.min(...venue.courts.map((c) => c.defaultPrice)) : null;
 
 	// Sports list is already an array of strings
 	const sportsList = venue.sports;
@@ -82,11 +76,16 @@ const VenueCard = ({ venue, className, showDescription = false }: VenueCardProps
 				)}
 
 				{/* Price Badge */}
-				{minPrice && (
+				{venue.startingPrice && (
 					<div className="absolute top-3 right-3">
-						<Badge className="bg-primary text-primary-foreground">
-							<IndianRupee className="h-3 w-3 mr-1" />
-							{minPrice}/hr
+						<Badge className="bg-primary text-primary-foreground shadow-lg">
+							<div className="flex flex-col items-center">
+								<div className="flex items-center">
+									<IndianRupee className="h-3 w-3 mr-1" />
+									<span className="font-bold">{venue.startingPrice}/hr</span>
+								</div>
+								<span className="text-[10px] opacity-90">Starting from</span>
+							</div>
 						</Badge>
 					</div>
 				)}

@@ -27,6 +27,8 @@ export interface Venue {
 	status?: string;
 	rejectionReason?: string;
 	isActive?: boolean;
+	startingPrice?: number | null;
+	courtCount?: number;
 	createdAt?: string;
 	updatedAt?: string;
 }
