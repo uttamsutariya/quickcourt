@@ -1,8 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { Edit, Trash2, Eye, MapPin, Clock, Building2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { formatSportLabel } from "@/utils/sport-formatter";
 import type { Venue } from "@/services/venue.service";
 
@@ -14,131 +11,141 @@ interface VenueCardProps {
 const VenueCard = ({ venue, onDelete }: VenueCardProps) => {
 	const navigate = useNavigate();
 
-	const getStatusBadge = (status?: string) => {
+	const getStatusStyles = (status?: string) => {
 		switch (status) {
 			case "pending":
-				return (
-					<Badge variant="secondary" className="absolute top-2 right-2">
-						Pending
-					</Badge>
-				);
+				return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20";
 			case "approved":
-				return <Badge className="absolute top-2 right-2 bg-green-500/90 hover:bg-green-500">Approved</Badge>;
+				return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
 			case "rejected":
-				return (
-					<Badge variant="destructive" className="absolute top-2 right-2">
-						Rejected
-					</Badge>
-				);
+				return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
 			default:
-				return null;
+				return "";
+		}
+	};
+
+	const getStatusLabel = (status?: string) => {
+		switch (status) {
+			case "pending":
+				return "Pending";
+			case "approved":
+				return "Approved";
+			case "rejected":
+				return "Rejected";
+			default:
+				return "";
 		}
 	};
 
 	return (
-		<Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-border/50">
-			{/* Image Section */}
-			<div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+		<div className="group bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200">
+			{/* Image Section with fixed aspect ratio */}
+			<div className="relative w-full h-48 bg-muted overflow-hidden">
 				{venue.images && venue.images.length > 0 ? (
-					<>
-						<img
-							src={venue.images[0]}
-							alt={venue.name}
-							className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-							onError={(e) => {
-								const target = e.target as HTMLImageElement;
-								target.style.display = "none";
-								const fallback = target.nextElementSibling as HTMLElement;
-								if (fallback) fallback.style.display = "flex";
-							}}
-						/>
-						<div className="hidden absolute inset-0 items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-							<Building2 className="h-12 w-12 text-primary/30" />
-						</div>
-					</>
-				) : (
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Building2 className="h-12 w-12 text-primary/30" />
+					<img
+						src={venue.images[0]}
+						alt={venue.name}
+						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+						onError={(e) => {
+							const target = e.target as HTMLImageElement;
+							target.style.display = "none";
+							const fallback = target.nextElementSibling as HTMLElement;
+							if (fallback) fallback.style.display = "flex";
+						}}
+					/>
+				) : null}
+
+				{/* Fallback or error state */}
+				<div
+					className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/50 ${
+						venue.images && venue.images.length > 0 ? "hidden" : ""
+					}`}
+				>
+					<Building2 className="h-12 w-12 text-muted-foreground/30" />
+				</div>
+
+				{/* Status Badge */}
+				{venue.status && (
+					<div
+						className={`absolute top-2 right-2 px-2 py-1 rounded-md text-xs font-medium border ${getStatusStyles(
+							venue.status,
+						)}`}
+					>
+						{getStatusLabel(venue.status)}
 					</div>
 				)}
-				{getStatusBadge(venue.status)}
 
-				{/* Gradient Overlay */}
-				<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+				{/* Hover Overlay */}
+				<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 			</div>
 
 			{/* Content */}
-			<CardHeader className="pb-3">
-				<div className="space-y-1">
-					<h3 className="text-lg font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+			<div className="p-4 space-y-3">
+				{/* Title and Location */}
+				<div>
+					<h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
 						{venue.name}
 					</h3>
-					<div className="flex items-center text-sm text-muted-foreground">
+					<div className="flex items-center mt-1 text-sm text-muted-foreground">
 						<MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
 						<span className="line-clamp-1">
 							{venue.address.city}, {venue.address.state}
 						</span>
 					</div>
 				</div>
-			</CardHeader>
 
-			<CardContent className="pb-3">
-				<p className="text-sm text-muted-foreground line-clamp-2 mb-3">{venue.description}</p>
+				{/* Description */}
+				<p className="text-sm text-muted-foreground line-clamp-2">{venue.description}</p>
 
 				{/* Sports Tags */}
 				<div className="flex flex-wrap gap-1">
 					{venue.sports.slice(0, 3).map((sport) => (
-						<Badge key={sport} variant="outline" className="text-xs">
+						<span
+							key={sport}
+							className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+						>
 							{formatSportLabel(sport)}
-						</Badge>
+						</span>
 					))}
 					{venue.sports.length > 3 && (
-						<Badge variant="outline" className="text-xs">
+						<span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-muted text-muted-foreground">
 							+{venue.sports.length - 3}
-						</Badge>
+						</span>
 					)}
 				</div>
-			</CardContent>
 
-			{/* Footer */}
-			<CardFooter className="pt-3 border-t">
-				<div className="flex items-center justify-between w-full">
+				{/* Footer */}
+				<div className="flex items-center justify-between pt-3 border-t">
 					<div className="flex items-center text-xs text-muted-foreground">
 						<Clock className="h-3 w-3 mr-1" />
 						<span>{new Date(venue.createdAt!).toLocaleDateString()}</span>
 					</div>
 					<div className="flex gap-1">
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8"
+						<button
+							className="p-1.5 rounded-md hover:bg-accent transition-colors"
 							onClick={() => navigate(`/owner/venues/${venue._id}`)}
 							title="View Details"
 						>
 							<Eye className="h-4 w-4" />
-						</Button>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8"
+						</button>
+						<button
+							className="p-1.5 rounded-md hover:bg-accent transition-colors"
 							onClick={() => navigate(`/owner/venues/${venue._id}/edit`)}
 							title="Edit Venue"
 						>
 							<Edit className="h-4 w-4" />
-						</Button>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8 hover:text-destructive"
+						</button>
+						<button
+							className="p-1.5 rounded-md hover:bg-accent hover:text-destructive transition-colors"
 							onClick={() => onDelete(venue)}
 							title="Delete Venue"
 						>
 							<Trash2 className="h-4 w-4" />
-						</Button>
+						</button>
 					</div>
 				</div>
-			</CardFooter>
-		</Card>
+			</div>
+		</div>
 	);
 };
 

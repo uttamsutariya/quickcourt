@@ -337,7 +337,7 @@ const VenueDetails = () => {
 
 			{/* Image View Modal */}
 			<Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-				<DialogContent className="max-w-4xl p-0">
+				<DialogContent className="max-w-4xl p-0 overflow-hidden">
 					<div className="relative">
 						<Button
 							variant="ghost"
