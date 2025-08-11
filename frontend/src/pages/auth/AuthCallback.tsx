@@ -57,12 +57,12 @@ const AuthCallback = () => {
 			const from = location.state?.from?.pathname;
 
 			const roleRedirects = {
-				user: "/dashboard",
+				user: "/user/dashboard",
 				facility_owner: "/owner/dashboard",
 				admin: "/admin/dashboard",
 			};
 
-			const defaultRedirect = roleRedirects[user.role as keyof typeof roleRedirects] || "/dashboard";
+			const defaultRedirect = roleRedirects[user.role as keyof typeof roleRedirects] || "/user/dashboard";
 			const redirectPath = from || defaultRedirect;
 
 			console.log("Redirecting to:", redirectPath, "User role:", user.role);
@@ -83,8 +83,8 @@ const AuthCallback = () => {
 							</div>
 
 							<div className="space-y-3 text-center">
-								<h2 className="text-2xl font-semibold">Authenticating</h2>
-								<p className="text-muted-foreground">Setting up your QuickCourt account...</p>
+								<h2 className="text-2xl font-semibold">Loading...</h2>
+								<p className="text-muted-foreground">Please wait...</p>
 							</div>
 
 							<div className="w-full space-y-3">

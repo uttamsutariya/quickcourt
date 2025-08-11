@@ -11,11 +11,17 @@ import Login from "@/pages/auth/Login";
 import RoleSelection from "@/pages/auth/RoleSelection";
 import AuthCallback from "@/pages/auth/AuthCallback";
 
-// Protected Pages
+// Layout Components
 import OwnerLayout from "@/components/owner/OwnerLayout";
+import UserLayout from "@/components/user/UserLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
+
+// Protected Pages
 import OwnerDashboard from "@/pages/owner/OwnerDashboard";
 import MyVenues from "@/pages/owner/MyVenues";
 import CreateVenue from "@/pages/owner/CreateVenue";
+import EditVenue from "@/pages/owner/EditVenue";
+import VenueDetails from "@/pages/venue/VenueDetails";
 import ComingSoon from "@/pages/ComingSoon";
 
 // Components
@@ -46,16 +52,22 @@ function App() {
 								<Route path="/auth/login" element={<Login />} />
 								<Route path="/auth/role-selection" element={<RoleSelection />} />
 								<Route path="/auth/callback" element={<AuthCallback />} />
+								<Route path="/venues/:id" element={<VenueDetails />} />
 
-								{/* User Dashboard (Coming Soon) */}
+								{/* User Routes */}
 								<Route
-									path="/dashboard"
+									path="/user"
 									element={
 										<ProtectedRoute allowedRoles={["user"]}>
-											<ComingSoon />
+											<UserLayout />
 										</ProtectedRoute>
 									}
-								/>
+								>
+									<Route path="dashboard" element={<ComingSoon />} />
+									<Route path="bookings" element={<ComingSoon />} />
+									<Route path="settings" element={<ComingSoon />} />
+									<Route index element={<Navigate to="/user/dashboard" replace />} />
+								</Route>
 
 								{/* Facility Owner Routes */}
 								<Route
@@ -69,22 +81,29 @@ function App() {
 									<Route path="dashboard" element={<OwnerDashboard />} />
 									<Route path="venues" element={<MyVenues />} />
 									<Route path="venues/new" element={<CreateVenue />} />
-									<Route path="venues/:id" element={<ComingSoon />} />
-									<Route path="venues/:id/edit" element={<ComingSoon />} />
+									<Route path="venues/:id" element={<VenueDetails />} />
+									<Route path="venues/:id/edit" element={<EditVenue />} />
 									<Route path="bookings" element={<ComingSoon />} />
 									<Route path="settings" element={<ComingSoon />} />
 									<Route index element={<Navigate to="/owner/dashboard" replace />} />
 								</Route>
 
-								{/* Admin Routes (Coming Soon) */}
+								{/* Admin Routes */}
 								<Route
-									path="/admin/dashboard"
+									path="/admin"
 									element={
 										<ProtectedRoute allowedRoles={["admin"]}>
-											<ComingSoon />
+											<AdminLayout />
 										</ProtectedRoute>
 									}
-								/>
+								>
+									<Route path="dashboard" element={<ComingSoon />} />
+									<Route path="venues" element={<ComingSoon />} />
+									<Route path="users" element={<ComingSoon />} />
+									<Route path="bookings" element={<ComingSoon />} />
+									<Route path="settings" element={<ComingSoon />} />
+									<Route index element={<Navigate to="/admin/dashboard" replace />} />
+								</Route>
 
 								{/* Catch all - redirect to home */}
 								<Route path="*" element={<Navigate to="/" replace />} />

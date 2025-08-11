@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Edit, Trash2, Eye, MapPin, Clock, Loader2 } from "lucide-react";
+import { Plus, Loader2, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Dialog,
@@ -13,9 +12,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import VenueCard from "@/components/owner/VenueCard";
 import venueService, { type Venue } from "@/services/venue.service";
 import { toast } from "sonner";
-import { formatSportLabel } from "@/utils/sport-formatter";
 
 const MyVenues = () => {
 	const navigate = useNavigate();
@@ -58,19 +57,6 @@ const MyVenues = () => {
 			toast.error(error.message || "Failed to delete venue");
 		} finally {
 			setDeleting(false);
-		}
-	};
-
-	const getStatusBadge = (status?: string) => {
-		switch (status) {
-			case "pending":
-				return <Badge variant="secondary">Pending Approval</Badge>;
-			case "approved":
-				return <Badge className="bg-green-500 text-white">Approved</Badge>;
-			case "rejected":
-				return <Badge variant="destructive">Rejected</Badge>;
-			default:
-				return null;
 		}
 	};
 
@@ -127,76 +113,7 @@ const MyVenues = () => {
 			) : (
 				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{venues.map((venue) => (
-						<Card key={venue._id} className="overflow-hidden hover:shadow-lg transition-shadow">
-							{/* Venue Image */}
-							{venue.images && venue.images.length > 0 ? (
-								<div className="aspect-video relative">
-									<img src={venue.images[0]} alt={venue.name} className="w-full h-full object-cover" />
-									<div className="absolute top-2 right-2">{getStatusBadge(venue.status)}</div>
-								</div>
-							) : (
-								<div className="aspect-video bg-muted flex items-center justify-center relative">
-									<Building2 className="h-12 w-12 text-muted-foreground" />
-									<div className="absolute top-2 right-2">{getStatusBadge(venue.status)}</div>
-								</div>
-							)}
-
-							<CardHeader>
-								<h3 className="text-lg font-semibold line-clamp-1">{venue.name}</h3>
-								<div className="flex items-center text-sm text-muted-foreground mt-1">
-									<MapPin className="h-3 w-3 mr-1" />
-									<span className="line-clamp-1">
-										{venue.address.city}, {venue.address.state}
-									</span>
-								</div>
-							</CardHeader>
-
-							<CardContent>
-								<p className="text-sm text-muted-foreground line-clamp-2">{venue.description}</p>
-								<div className="mt-3 flex flex-wrap gap-1">
-									{venue.sports.slice(0, 3).map((sport) => (
-										<Badge key={sport} variant="outline" className="text-xs">
-											{formatSportLabel(sport)}
-										</Badge>
-									))}
-									{venue.sports.length > 3 && (
-										<Badge variant="outline" className="text-xs">
-											+{venue.sports.length - 3} more
-										</Badge>
-									)}
-								</div>
-								<div className="mt-3 flex items-center text-xs text-muted-foreground">
-									<Clock className="h-3 w-3 mr-1" />
-									<span>Created {new Date(venue.createdAt!).toLocaleDateString()}</span>
-								</div>
-							</CardContent>
-
-							<CardFooter className="border-t pt-4">
-								<div className="flex gap-2 w-full">
-									<Button
-										variant="outline"
-										size="sm"
-										className="flex-1"
-										onClick={() => navigate(`/owner/venues/${venue._id}`)}
-									>
-										<Eye className="h-4 w-4 mr-1" />
-										View
-									</Button>
-									<Button
-										variant="outline"
-										size="sm"
-										className="flex-1"
-										onClick={() => navigate(`/owner/venues/${venue._id}/edit`)}
-									>
-										<Edit className="h-4 w-4 mr-1" />
-										Edit
-									</Button>
-									<Button variant="outline" size="sm" onClick={() => setDeleteDialog({ open: true, venue })}>
-										<Trash2 className="h-4 w-4" />
-									</Button>
-								</div>
-							</CardFooter>
-						</Card>
+						<VenueCard key={venue._id} venue={venue} onDelete={(venue) => setDeleteDialog({ open: true, venue })} />
 					))}
 				</div>
 			)}
@@ -230,8 +147,5 @@ const MyVenues = () => {
 		</div>
 	);
 };
-
-// Import Building2 icon
-import { Building2 } from "lucide-react";
 
 export default MyVenues;
