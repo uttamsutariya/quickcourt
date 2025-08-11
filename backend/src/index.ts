@@ -1,52 +1,56 @@
-import express from "express";
-import cors from "cors";
+import dotenv from "dotenv";
+import app from "./app";
 import { config } from "./config/env";
+import { connectDatabase, disconnectDatabase } from "./config/database";
 
-const app = express();
+// Load environment variables
+dotenv.config();
 
-// Create HTTP server
-const server = require("http").createServer(app);
-
-// Middleware
-app.use(
-	cors({
-		origin: config.frontendUrl,
-		credentials: true,
-	}),
-);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-if (config.isDevelopment) {
-	app.use((req, _res, next) => {
-		console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-		next();
-	});
-}
-
-// 404 handler
-app.use((req, res) => {
-	res.status(404).json({
-		error: "Not Found",
-		message: `Route ${req.method} ${req.path} not found`,
-	});
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+	console.error("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+	console.error(err.name, err.message);
+	process.exit(1);
 });
 
+// Start server
 const startServer = async () => {
 	try {
-		server.listen(config.port, () => {
+		// Connect to MongoDB
+		await connectDatabase();
+
+		// Start Express server
+		const server = app.listen(config.port, () => {
 			console.log(`🚀 Server is running on port ${config.port}`);
 			console.log(`📍 Environment: ${config.nodeEnv}`);
-			console.log(`🌐 Frontend URL: ${config.frontendUrl}`);
+			console.log(`🔗 Health check: http://localhost:${config.port}/health`);
 		});
 
-		server.on("error", (error: NodeJS.ErrnoException) => {
-			if (error.code === "EADDRINUSE") {
-				console.error(`Port ${config.port} is already in use`);
-			} else {
-				console.error("Server error:", error);
-			}
-			process.exit(1);
+		// Handle unhandled promise rejections
+		process.on("unhandledRejection", (err: Error) => {
+			console.error("UNHANDLED REJECTION! 💥 Shutting down...");
+			console.error(err.name, err.message);
+			server.close(() => {
+				disconnectDatabase();
+				process.exit(1);
+			});
+		});
+
+		// Handle graceful shutdown
+		process.on("SIGTERM", () => {
+			console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
+			server.close(() => {
+				disconnectDatabase();
+				console.log("💥 Process terminated!");
+			});
+		});
+
+		process.on("SIGINT", () => {
+			console.log("👋 SIGINT RECEIVED. Shutting down gracefully");
+			server.close(() => {
+				disconnectDatabase();
+				console.log("💥 Process terminated!");
+			});
 		});
 	} catch (error) {
 		console.error("Failed to start server:", error);
@@ -54,39 +58,5 @@ const startServer = async () => {
 	}
 };
 
+// Start the application
 startServer();
-
-const shutdown = async () => {
-	console.log("\nShutting down gracefully...");
-
-	try {
-		await new Promise<void>((resolve, reject) => {
-			server.close((err: Error) => {
-				if (err) {
-					console.error("Error closing server:", err);
-					reject(err);
-				} else {
-					console.log("Server closed");
-					resolve();
-				}
-			});
-		});
-	} catch (error) {
-		console.error("Error during shutdown:", error);
-		process.exit(1);
-	}
-};
-
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
-
-process.on("unhandledRejection", (reason, promise) => {
-	console.error("Unhandled Rejection at:", promise, "reason:", reason);
-});
-
-process.on("uncaughtException", (error) => {
-	console.error("Uncaught Exception:", error);
-	shutdown();
-});
-
-export default app;

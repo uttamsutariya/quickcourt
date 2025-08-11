@@ -1,0 +1,60 @@
+import express, { Application, Request, Response } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import { config } from "./config/env";
+import { errorHandler } from "./middleware/error.middleware";
+
+// Import routes
+import authRoutes from "./routes/auth.routes";
+
+// Create Express app
+const app: Application = express();
+
+// Security middleware
+app.use(helmet());
+
+// CORS configuration
+app.use(
+	cors({
+		origin: config.cors.origin,
+		credentials: config.cors.credentials,
+		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+	}),
+);
+
+// Body parsing middleware
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Logging middleware (only in development)
+if (config.nodeEnv === "development") {
+	app.use(morgan("dev"));
+}
+
+// Health check endpoint
+app.get("/health", (_req: Request, res: Response) => {
+	res.json({
+		success: true,
+		message: "QuickCourt API is running",
+		timestamp: new Date().toISOString(),
+		environment: config.nodeEnv,
+	});
+});
+
+// API routes
+app.use(`${config.app.apiPrefix}/auth`, authRoutes);
+
+// 404 handler
+app.use((_req: Request, res: Response) => {
+	res.status(404).json({
+		success: false,
+		message: "Route not found",
+	});
+});
+
+// Global error handler
+app.use(errorHandler);
+
+export default app;
