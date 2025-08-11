@@ -57,11 +57,9 @@ const venueSchema = new Schema<IVenue>(
 			type: {
 				type: String,
 				enum: ["Point"],
-				default: "Point",
 			},
 			coordinates: {
 				type: [Number],
-				required: false, // Can be added later for map functionality
 			},
 		},
 		sports: {
@@ -116,7 +114,7 @@ venueSchema.index({ ownerId: 1, status: 1 });
 venueSchema.index({ status: 1, isActive: 1 });
 venueSchema.index({ sports: 1 });
 venueSchema.index({ "address.city": 1 });
-venueSchema.index({ location: "2dsphere" }); // For geospatial queries
+venueSchema.index({ location: "2dsphere" }, { sparse: true }); // For geospatial queries - sparse index for optional location
 venueSchema.index({ createdAt: -1 });
 venueSchema.index({ name: "text", description: "text" }); // For text search
 
