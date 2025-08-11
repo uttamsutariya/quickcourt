@@ -4,6 +4,7 @@ import { Document, Types } from "mongoose";
 import {
 	UserRole,
 	VenueStatus,
+	VenueType,
 	BookingStatus,
 	DayOfWeek,
 	SportType,
@@ -40,6 +41,7 @@ export interface IVenue extends Document {
 		type: string;
 		coordinates: [number, number]; // [longitude, latitude]
 	};
+	venueType: VenueType;
 	sports: SportType[];
 	amenities: string[];
 	images: string[]; // Cloudinary URLs

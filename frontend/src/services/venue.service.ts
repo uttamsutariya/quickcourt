@@ -20,6 +20,7 @@ export interface Venue {
 	description: string;
 	address: Address;
 	location?: Location;
+	venueType?: string;
 	sports: string[];
 	amenities: string[];
 	images: string[];

@@ -75,11 +75,19 @@ const Navbar = () => {
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button variant="ghost" className="flex h-9 items-center gap-2 px-2">
-										<div className="h-7 w-7 rounded-full gradient-primary flex shrink-0 items-center justify-center text-primary-foreground font-semibold text-sm">
-											{user.name?.charAt(0).toUpperCase() || "U"}
-										</div>
+										{user.avatarUrl ? (
+											<img
+												src={user.avatarUrl}
+												alt={user.name}
+												className="h-7 w-7 rounded-full object-cover flex shrink-0 items-center justify-center"
+											/>
+										) : (
+											<div className="h-7 w-7 rounded-full gradient-primary flex shrink-0 items-center justify-center text-primary-foreground font-semibold text-sm">
+												{user.name?.split(" ")[0]?.charAt(0).toUpperCase() || "U"}
+											</div>
+										)}
 										<span className="hidden lg:inline-block text-sm font-medium max-w-[150px] truncate">
-											{user.name}
+											{user.name?.split(" ")[0]}
 										</span>
 										<ChevronDown className="h-4 w-4 opacity-50" />
 									</Button>

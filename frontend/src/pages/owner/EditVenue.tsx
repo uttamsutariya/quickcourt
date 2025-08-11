@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, Loader2, Settings, Building2, Activity, IndianRupee } from "lucide-react";
+import { ChevronLeft, Loader2, Settings, Building2, Activity, IndianRupee, Home, Trees } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageUpload from "@/components/owner/ImageUpload";
 import CourtManagement from "@/components/courts/CourtManagement";
 import venueService, { type Venue } from "@/services/venue.service";
 import { type Court } from "@/services/court.service";
+import { VenueType } from "@/types/enums";
 import { toast } from "sonner";
 
 // Map display names to backend enum values
@@ -225,6 +227,52 @@ const EditVenue = () => {
 								rows={5}
 								required
 							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label>Venue Type *</Label>
+							<RadioGroup
+								value={formData.venueType || VenueType.BOTH}
+								onValueChange={(value) => setFormData({ ...formData, venueType: value as VenueType })}
+								className="grid grid-cols-3 gap-4"
+							>
+								<div className="flex items-start space-x-2">
+									<RadioGroupItem value={VenueType.INDOOR} id="indoor" className="mt-1" />
+									<Label htmlFor="indoor" className="cursor-pointer">
+										<div className="flex items-center gap-2">
+											<Home className="h-4 w-4" />
+											<div>
+												<p className="font-medium">Indoor</p>
+												<p className="text-xs text-muted-foreground">Covered facilities</p>
+											</div>
+										</div>
+									</Label>
+								</div>
+								<div className="flex items-start space-x-2">
+									<RadioGroupItem value={VenueType.OUTDOOR} id="outdoor" className="mt-1" />
+									<Label htmlFor="outdoor" className="cursor-pointer">
+										<div className="flex items-center gap-2">
+											<Trees className="h-4 w-4" />
+											<div>
+												<p className="font-medium">Outdoor</p>
+												<p className="text-xs text-muted-foreground">Open-air facilities</p>
+											</div>
+										</div>
+									</Label>
+								</div>
+								<div className="flex items-start space-x-2">
+									<RadioGroupItem value={VenueType.BOTH} id="both" className="mt-1" />
+									<Label htmlFor="both" className="cursor-pointer">
+										<div className="flex items-center gap-2">
+											<Building2 className="h-4 w-4" />
+											<div>
+												<p className="font-medium">Both</p>
+												<p className="text-xs text-muted-foreground">Mixed facilities</p>
+											</div>
+										</div>
+									</Label>
+								</div>
+							</RadioGroup>
 						</div>
 					</CardContent>
 				</Card>

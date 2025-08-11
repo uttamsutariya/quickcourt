@@ -65,6 +65,14 @@ export const VenueStatus = {
 } as const;
 export type VenueStatus = (typeof VenueStatus)[keyof typeof VenueStatus];
 
+// Venue type
+export const VenueType = {
+	INDOOR: "indoor",
+	OUTDOOR: "outdoor",
+	BOTH: "both",
+} as const;
+export type VenueType = (typeof VenueType)[keyof typeof VenueType];
+
 // User roles
 export const UserRole = {
 	USER: "user",

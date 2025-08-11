@@ -16,7 +16,7 @@ import { popularSports } from "@/data/sports";
 interface Filters {
 	searchTerm: string;
 	sports: string[];
-	venueType: "all" | "indoor" | "outdoor";
+	venueType: "all" | "indoor" | "outdoor" | "both";
 	minPrice: number;
 	maxPrice: number;
 }

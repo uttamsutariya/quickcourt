@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Loader2, MapPin, Image, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, MapPin, Image, CheckCircle, Home, Trees, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ImageUpload from "@/components/owner/ImageUpload";
 import venueService, { type Venue } from "@/services/venue.service";
+import { VenueType } from "@/types/enums";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Map display names to backend enum values
 const SPORTS_OPTIONS = [
@@ -54,6 +57,7 @@ const CreateVenue = () => {
 	const [formData, setFormData] = useState<Partial<Venue>>({
 		name: "",
 		description: "",
+		venueType: VenueType.BOTH,
 		address: {
 			street: "",
 			city: "",
@@ -75,6 +79,7 @@ const CreateVenue = () => {
 			case 1:
 				if (!formData.name?.trim()) newErrors.name = "Venue name is required";
 				if (!formData.description?.trim()) newErrors.description = "Description is required";
+				if (!formData.venueType) newErrors.venueType = "Venue type is required";
 				break;
 			case 2:
 				if (!formData.address?.street?.trim()) newErrors.street = "Street address is required";
@@ -247,6 +252,53 @@ const CreateVenue = () => {
 								/>
 								{errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
 							</div>
+
+							<div className="space-y-2">
+								<Label>Venue Type *</Label>
+								<RadioGroup
+									value={formData.venueType}
+									onValueChange={(value) => setFormData({ ...formData, venueType: value as VenueType })}
+									className="grid grid-cols-3 gap-4"
+								>
+									<div className="flex items-start space-x-2">
+										<RadioGroupItem value={VenueType.INDOOR} id="indoor" className="mt-1" />
+										<Label htmlFor="indoor" className="cursor-pointer">
+											<div className="flex items-center gap-2">
+												<Home className="h-4 w-4" />
+												<div>
+													<p className="font-medium">Indoor</p>
+													<p className="text-xs text-muted-foreground">Covered facilities</p>
+												</div>
+											</div>
+										</Label>
+									</div>
+									<div className="flex items-start space-x-2">
+										<RadioGroupItem value={VenueType.OUTDOOR} id="outdoor" className="mt-1" />
+										<Label htmlFor="outdoor" className="cursor-pointer">
+											<div className="flex items-center gap-2">
+												<Trees className="h-4 w-4" />
+												<div>
+													<p className="font-medium">Outdoor</p>
+													<p className="text-xs text-muted-foreground">Open-air facilities</p>
+												</div>
+											</div>
+										</Label>
+									</div>
+									<div className="flex items-start space-x-2">
+										<RadioGroupItem value={VenueType.BOTH} id="both" className="mt-1" />
+										<Label htmlFor="both" className="cursor-pointer">
+											<div className="flex items-center gap-2">
+												<Building2 className="h-4 w-4" />
+												<div>
+													<p className="font-medium">Both</p>
+													<p className="text-xs text-muted-foreground">Mixed facilities</p>
+												</div>
+											</div>
+										</Label>
+									</div>
+								</RadioGroup>
+								{errors.venueType && <p className="text-sm text-destructive">{errors.venueType}</p>}
+							</div>
 						</div>
 					)}
 
@@ -417,10 +469,5 @@ const CreateVenue = () => {
 		</div>
 	);
 };
-
-// Add cn utility function import
-function cn(...classes: (string | boolean | undefined)[]) {
-	return classes.filter(Boolean).join(" ");
-}
 
 export default CreateVenue;

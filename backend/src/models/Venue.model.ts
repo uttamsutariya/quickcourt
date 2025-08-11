@@ -1,6 +1,6 @@
 import { Schema, model, Types } from "mongoose";
 import { IVenue } from "../types/interfaces";
-import { VenueStatus, SportType } from "../types/enums";
+import { VenueStatus, VenueType, SportType } from "../types/enums";
 import { IVenueModel } from "../types/model-statics";
 
 const venueSchema = new Schema<IVenue>(
@@ -61,6 +61,12 @@ const venueSchema = new Schema<IVenue>(
 			coordinates: {
 				type: [Number],
 			},
+		},
+		venueType: {
+			type: String,
+			enum: Object.values(VenueType),
+			required: [true, "Venue type is required"],
+			default: VenueType.BOTH,
 		},
 		sports: {
 			type: [String],

@@ -15,6 +15,9 @@ import {
 	Eye,
 	X,
 	ImageIcon,
+	Home,
+	Trees,
+	Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +34,7 @@ import {
 
 import venueService, { type Venue } from "@/services/venue.service";
 import { formatSportLabel } from "@/utils/sport-formatter";
+import { VenueType } from "@/types/enums";
 import useAuthStore from "@/stores/auth-store";
 import { toast } from "sonner";
 import BookingModal from "@/components/booking/BookingModal";
@@ -114,6 +118,35 @@ const VenueDetails = () => {
 				);
 			default:
 				return null;
+		}
+	};
+
+	const getVenueTypeInfo = (type?: string) => {
+		switch (type) {
+			case VenueType.INDOOR:
+				return {
+					icon: Home,
+					label: "Indoor",
+					description: "Covered facilities",
+				};
+			case VenueType.OUTDOOR:
+				return {
+					icon: Trees,
+					label: "Outdoor",
+					description: "Open-air facilities",
+				};
+			case VenueType.BOTH:
+				return {
+					icon: Building2,
+					label: "Indoor & Outdoor",
+					description: "Mixed facilities",
+				};
+			default:
+				return {
+					icon: Building2,
+					label: "Indoor & Outdoor",
+					description: "Mixed facilities",
+				};
 		}
 	};
 
@@ -216,6 +249,21 @@ const VenueDetails = () => {
 							<div>
 								<h3 className="font-semibold mb-2">Description</h3>
 								<p className="text-muted-foreground">{venue.description}</p>
+							</div>
+
+							<div>
+								<h3 className="font-semibold mb-2">Venue Type</h3>
+								{(() => {
+									const typeInfo = getVenueTypeInfo(venue.venueType);
+									const Icon = typeInfo.icon;
+									return (
+										<div className="flex items-center gap-2">
+											<Icon className="h-5 w-5 text-primary" />
+											<span className="font-medium">{typeInfo.label}</span>
+											<span className="text-sm text-muted-foreground">- {typeInfo.description}</span>
+										</div>
+									);
+								})()}
 							</div>
 
 							<div>

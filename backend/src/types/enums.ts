@@ -12,6 +12,12 @@ export enum VenueStatus {
 	REJECTED = "rejected",
 }
 
+export enum VenueType {
+	INDOOR = "indoor",
+	OUTDOOR = "outdoor",
+	BOTH = "both",
+}
+
 export enum BookingStatus {
 	CONFIRMED = "confirmed",
 	COMPLETED = "completed",
