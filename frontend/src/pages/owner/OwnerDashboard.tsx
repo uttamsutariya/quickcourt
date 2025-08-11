@@ -1,239 +1,311 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Plus, Calendar, TrendingUp, Users, Clock, DollarSign, CheckCircle, XCircle } from "lucide-react";
+import {
+	Building2,
+	Plus,
+	Calendar,
+	TrendingUp,
+	Clock,
+	CheckCircle,
+	XCircle,
+	Activity,
+	ChartBar,
+	Eye,
+	IndianRupee,
+	AlertCircle,
+	ArrowUpRight,
+} from "lucide-react";
 import useAuthStore from "@/stores/auth-store";
-import venueService, { type Venue } from "@/services/venue.service";
+import ownerDashboardService, { type DashboardStats } from "@/services/owner-dashboard.service";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const OwnerDashboard = () => {
 	const navigate = useNavigate();
 	const { user } = useAuthStore();
-	const [venues, setVenues] = useState<Venue[]>([]);
+	const [stats, setStats] = useState<DashboardStats | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		fetchVenues();
+		fetchDashboardStats();
 	}, []);
 
-	const fetchVenues = async () => {
+	const fetchDashboardStats = async () => {
 		try {
 			setLoading(true);
-			const response = await venueService.getMyVenues();
-			setVenues(response.venues);
-		} catch (error) {
-			console.error("Failed to fetch venues:", error);
+			const data = await ownerDashboardService.getDashboardStats();
+			setStats(data);
+		} catch (error: any) {
+			console.error("Failed to fetch dashboard stats:", error);
+			toast.error(error.response?.data?.message || "Failed to fetch dashboard statistics");
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// Calculate statistics
-	const stats = {
-		total: venues.length,
-		approved: venues.filter((v) => v.status === "approved")?.length,
-		pending: venues.filter((v) => v.status === "pending")?.length,
-		rejected: venues.filter((v) => v.status === "rejected")?.length,
+	const formatCurrency = (amount: number) => {
+		return new Intl.NumberFormat("en-IN", {
+			style: "currency",
+			currency: "INR",
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0,
+		}).format(amount);
 	};
-
-	const statsCards = [
-		{
-			title: "Total Venues",
-			value: stats.total.toString(),
-			description: "All your venues",
-			icon: Building2,
-			color: "text-blue-500",
-			bgColor: "bg-blue-500/10",
-		},
-		{
-			title: "Approved",
-			value: stats.approved.toString(),
-			description: "Active venues",
-			icon: CheckCircle,
-			color: "text-green-500",
-			bgColor: "bg-green-500/10",
-		},
-		{
-			title: "Pending",
-			value: stats.pending.toString(),
-			description: "Awaiting approval",
-			icon: Clock,
-			color: "text-yellow-500",
-			bgColor: "bg-yellow-500/10",
-		},
-		{
-			title: "Rejected",
-			value: stats.rejected.toString(),
-			description: "Need attention",
-			icon: XCircle,
-			color: "text-red-500",
-			bgColor: "bg-red-500/10",
-		},
-	];
-
-	const placeholderStats = [
-		{
-			title: "Total Bookings",
-			value: "0",
-			description: "This month",
-			icon: Calendar,
-			color: "text-purple-500",
-			bgColor: "bg-purple-500/10",
-		},
-		{
-			title: "Revenue",
-			value: "₹0",
-			description: "This month",
-			icon: DollarSign,
-			color: "text-indigo-500",
-			bgColor: "bg-indigo-500/10",
-		},
-		{
-			title: "Active Courts",
-			value: "0",
-			description: "Available for booking",
-			icon: Users,
-			color: "text-orange-500",
-			bgColor: "bg-orange-500/10",
-		},
-	];
 
 	if (loading) {
 		return (
-			<div className="container mx-auto p-6">
+			<div className="container mx-auto p-6 max-w-7xl">
 				<div className="mb-8">
-					<Skeleton className="h-8 w-64" />
-					<Skeleton className="h-4 w-48 mt-2" />
+					<Skeleton className="h-9 w-64" />
+					<Skeleton className="h-5 w-48 mt-2" />
 				</div>
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-					{[1, 2, 3, 4].map((i) => (
-						<div key={i} className="bg-card border rounded-lg p-4">
-							<div className="flex items-start justify-between">
-								<div className="flex-1">
-									<Skeleton className="h-4 w-20 mb-2" />
-									<Skeleton className="h-7 w-16 mb-1" />
-									<Skeleton className="h-3 w-24" />
-								</div>
-								<Skeleton className="h-8 w-8 rounded-lg" />
-							</div>
-						</div>
-					))}
+				<div className="grid gap-6 lg:grid-cols-2 mb-6">
+					<Skeleton className="h-52 w-full rounded-lg" />
+					<Skeleton className="h-52 w-full rounded-lg" />
+				</div>
+				<div className="grid gap-6 lg:grid-cols-2 mb-6">
+					<Skeleton className="h-28 w-full rounded-lg" />
+					<Skeleton className="h-28 w-full rounded-lg" />
+				</div>
+			</div>
+		);
+	}
+
+	if (!stats) {
+		return (
+			<div className="container mx-auto p-6 max-w-7xl">
+				<div className="text-center py-12">
+					<AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+					<h3 className="text-lg font-semibold mb-2">Unable to load dashboard</h3>
+					<p className="text-muted-foreground mb-4">There was an error loading your dashboard statistics.</p>
+					<Button onClick={fetchDashboardStats}>Retry</Button>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="container mx-auto p-6">
+		<div className="container mx-auto p-6 max-w-7xl">
 			{/* Header */}
 			<div className="mb-8">
 				<h1 className="text-3xl font-bold">Welcome back, {user?.name}!</h1>
-				<p className="text-muted-foreground mt-2">Here's an overview of your facilities</p>
+				<p className="text-muted-foreground mt-2">Here's your business overview at a glance</p>
 			</div>
 
-			{/* Venue Stats Grid */}
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-				{statsCards.map((stat) => (
-					<div key={stat.title} className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
-						<div className="flex items-start justify-between">
-							<div className="flex-1">
-								<p className="text-sm text-muted-foreground">{stat.title}</p>
-								<p className="text-2xl font-bold mt-1">{stat.value}</p>
-								<p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+			{/* Main KPI Cards Grid */}
+			<div className="grid gap-6 lg:grid-cols-2 mb-6">
+				{/* Venues Card */}
+				<div className="bg-card dark:bg-zinc-950 border rounded-lg shadow-sm">
+					<div className="p-6">
+						<div className="flex items-center justify-between mb-6">
+							<div className="flex items-center gap-3">
+								<div className="p-2 bg-muted rounded-lg">
+									<Building2 className="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<h3 className="text-lg font-semibold">Venue Overview</h3>
+									<p className="text-sm text-muted-foreground">Manage your sports facilities</p>
+								</div>
 							</div>
-							<div className={`p-2 rounded-lg ${stat.bgColor}`}>
-								<stat.icon className={`h-4 w-4 ${stat.color}`} />
+						</div>
+
+						<div className="grid grid-cols-2 gap-4 mb-6">
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground">Total</p>
+								<p className="text-2xl font-bold">{stats.venues.total}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground flex items-center gap-1">
+									<CheckCircle className="h-3.5 w-3.5 text-green-500" />
+									Approved
+								</p>
+								<p className="text-2xl font-bold">{stats.venues.approved}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground flex items-center gap-1">
+									<Clock className="h-3.5 w-3.5 text-yellow-500" />
+									Pending
+								</p>
+								<p className="text-2xl font-bold">{stats.venues.pending}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground flex items-center gap-1">
+									<XCircle className="h-3.5 w-3.5 text-red-500" />
+									Rejected
+								</p>
+								<p className="text-2xl font-bold">{stats.venues.rejected}</p>
+							</div>
+						</div>
+
+						<div className="flex gap-3">
+							<Button onClick={() => navigate("/owner/venues/new")} className="flex-1" variant="default" size="default">
+								<Plus className="mr-2 h-4 w-4" />
+								Add Venue
+							</Button>
+							<Button variant="outline" onClick={() => navigate("/owner/venues")} className="flex-1" size="default">
+								<Eye className="mr-2 h-4 w-4" />
+								View All
+							</Button>
+						</div>
+					</div>
+				</div>
+
+				{/* Bookings Card */}
+				<div className="bg-card dark:bg-zinc-950 border rounded-lg shadow-sm">
+					<div className="p-6">
+						<div className="flex items-center justify-between mb-6">
+							<div className="flex items-center gap-3">
+								<div className="p-2 bg-muted rounded-lg">
+									<Calendar className="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<h3 className="text-lg font-semibold">Booking Statistics</h3>
+									<p className="text-sm text-muted-foreground">Track your bookings performance</p>
+								</div>
+							</div>
+						</div>
+
+						<div className="grid grid-cols-3 gap-4 mb-6">
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground">Total</p>
+								<p className="text-2xl font-bold">{stats.bookings.total}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground">Today</p>
+								<p className="text-2xl font-bold text-primary">{stats.bookings.today}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground">This Month</p>
+								<p className="text-2xl font-bold text-primary">{stats.bookings.thisMonth}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground flex items-center gap-1">
+									<ArrowUpRight className="h-3.5 w-3.5 text-blue-500" />
+									Upcoming
+								</p>
+								<p className="text-xl font-semibold">{stats.bookings.upcoming}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground flex items-center gap-1">
+									<CheckCircle className="h-3.5 w-3.5 text-green-500" />
+									Completed
+								</p>
+								<p className="text-xl font-semibold">{stats.bookings.completed}</p>
+							</div>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground flex items-center gap-1">
+									<XCircle className="h-3.5 w-3.5 text-red-500" />
+									Cancelled
+								</p>
+								<p className="text-xl font-semibold">{stats.bookings.cancelled}</p>
+							</div>
+						</div>
+
+						<Button onClick={() => navigate("/owner/bookings")} className="w-full" variant="default" size="default">
+							<Calendar className="mr-2 h-4 w-4" />
+							View All Bookings
+						</Button>
+					</div>
+				</div>
+			</div>
+
+			{/* Secondary KPI Cards */}
+			<div className="grid gap-6 lg:grid-cols-2 mb-6">
+				{/* Active Courts Card */}
+				<div className="bg-card dark:bg-zinc-950 border rounded-lg shadow-sm">
+					<div className="p-6">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-3">
+								<div className="p-2.5 bg-muted rounded-lg">
+									<Activity className="h-6 w-6 text-primary" />
+								</div>
+								<div>
+									<p className="text-sm text-muted-foreground">Active Courts</p>
+									<p className="text-3xl font-bold mt-1">{stats.courts.totalActive}</p>
+									<p className="text-xs text-muted-foreground mt-1">Available for booking</p>
+								</div>
 							</div>
 						</div>
 					</div>
-				))}
-			</div>
+				</div>
 
-			{/* Additional Stats (Placeholders) */}
-			<div className="grid gap-4 md:grid-cols-3 mb-6">
-				{placeholderStats.map((stat) => (
-					<div key={stat.title} className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
-						<div className="flex items-start justify-between">
+				{/* Earnings Card */}
+				<div className="bg-card dark:bg-zinc-950 border rounded-lg shadow-sm">
+					<div className="p-6">
+						<div className="flex items-center justify-between">
 							<div className="flex-1">
-								<p className="text-sm text-muted-foreground">{stat.title}</p>
-								<p className="text-2xl font-bold mt-1">{stat.value}</p>
-								<p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
-							</div>
-							<div className={`p-2 rounded-lg ${stat.bgColor}`}>
-								<stat.icon className={`h-4 w-4 ${stat.color}`} />
+								<div className="flex items-center gap-3 mb-4">
+									<div className="p-2.5 bg-muted rounded-lg">
+										<IndianRupee className="h-6 w-6 text-primary" />
+									</div>
+									<div>
+										<p className="text-sm text-muted-foreground">Net Earnings</p>
+										<p className="text-xs text-muted-foreground">After 10% commission</p>
+									</div>
+								</div>
+								<div className="space-y-3">
+									<div className="flex items-baseline justify-between">
+										<p className="text-2xl font-bold text-primary">{formatCurrency(stats.earnings.netEarnings)}</p>
+										<span className="text-xs text-muted-foreground">All time</span>
+									</div>
+									<div className="pt-3 border-t">
+										<div className="flex items-baseline justify-between">
+											<p className="text-lg font-semibold">{formatCurrency(stats.earnings.thisMonthNetEarnings)}</p>
+											<span className="text-xs text-muted-foreground">This month</span>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
-				))}
+				</div>
 			</div>
 
-			{/* Quick Actions */}
-			<Card className="mb-8">
-				<CardHeader>
-					<CardTitle>Quick Actions</CardTitle>
-					<CardDescription>Manage your sports facilities</CardDescription>
-				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-3">
-					<Button onClick={() => navigate("/owner/venues/new")} className="gradient-primary text-primary-foreground">
-						<Plus className="mr-2 h-4 w-4" />
-						Add New Venue
-					</Button>
-					<Button variant="outline" onClick={() => navigate("/owner/venues")}>
-						<Building2 className="mr-2 h-4 w-4" />
-						Manage Venues
-					</Button>
-					<Button variant="outline" onClick={() => navigate("/owner/bookings")}>
-						<Calendar className="mr-2 h-4 w-4" />
-						View Bookings
-					</Button>
-				</CardContent>
-			</Card>
-
-			{stats.rejected > 0 && (
-				<div className="mt-6 rounded-lg border border-red-500/20 bg-red-500/5 p-4 mb-8">
-					<h3 className="text-base font-semibold mb-1 flex items-center gap-2">
-						<XCircle className="h-5 w-5 text-red-500" />
-						Venues Need Attention
-					</h3>
-					<p className="text-xs text-muted-foreground mb-4">
-						{stats.rejected} venue{stats.rejected > 1 ? "s have" : " has"} been rejected. Please review and update them
-						to meet the requirements.
-					</p>
-					<Button variant="outline" className="mt-2" onClick={() => navigate("/owner/venues")}>
-						View Rejected Venues
+			{/* Earnings Graph Placeholder */}
+			<div className="bg-card dark:bg-zinc-950 border rounded-lg shadow-sm p-6">
+				<div className="flex items-center justify-between mb-6">
+					<div className="flex items-center gap-3">
+						<div className="p-2 bg-muted rounded-lg">
+							<ChartBar className="h-5 w-5 text-primary" />
+						</div>
+						<div>
+							<h3 className="text-lg font-semibold">Revenue Trends</h3>
+							<p className="text-sm text-muted-foreground">Track your earnings over time</p>
+						</div>
+					</div>
+					<Button variant="outline" size="sm" disabled>
+						Coming Soon
 					</Button>
 				</div>
-			)}
-
-			{/* Recent Activity */}
-			<div className="grid gap-6 md:grid-cols-2">
-				{/* Revenue Trend */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Revenue Trend</CardTitle>
-						<CardDescription>Your earnings over time</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="flex items-center justify-center py-8 text-muted-foreground">
-							<div className="text-center">
-								<TrendingUp className="h-12 w-12 mx-auto mb-3" />
-								<p>No data available</p>
-								<p className="text-xs mt-2">Revenue tracking coming soon</p>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
+				<div className="flex items-center justify-center py-16 text-muted-foreground">
+					<div className="text-center">
+						<TrendingUp className="h-16 w-16 mx-auto mb-4 opacity-20" />
+						<p className="text-lg font-medium mb-2">Revenue Analytics Coming Soon</p>
+						<p className="text-sm max-w-md">
+							Interactive charts showing your revenue trends, peak booking times, and earnings projections will be
+							available here.
+						</p>
+					</div>
+				</div>
 			</div>
 
-			{/* Coming Soon Notice */}
-			{stats.approved === 0 && stats.total > 0 && (
-				<div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
-					<h3 className="text-base font-semibold mb-1">🎯 Next Steps</h3>
-					<p className="text-xs text-muted-foreground">
-						Once your venues are approved, you'll be able to add courts, set up time slots, and start receiving
-						bookings. The admin will review your submissions shortly.
-					</p>
+			{/* Alert for rejected venues */}
+			{stats.venues.rejected > 0 && (
+				<div className="mt-6 bg-destructive/5 border border-destructive/20 rounded-lg p-4">
+					<div className="flex items-start gap-3">
+						<AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+						<div className="flex-1">
+							<h3 className="text-sm font-semibold mb-1">Action Required</h3>
+							<p className="text-sm text-muted-foreground mb-3">
+								{stats.venues.rejected} venue{stats.venues.rejected > 1 ? "s have" : " has"} been rejected. Please
+								review and update to meet the requirements.
+							</p>
+							<Button variant="outline" size="sm" onClick={() => navigate("/owner/venues")}>
+								Review Venues
+							</Button>
+						</div>
+					</div>
 				</div>
 			)}
 		</div>

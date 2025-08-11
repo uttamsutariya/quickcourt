@@ -284,6 +284,106 @@ export const getOwnerBookings = async (req: Request, res: Response, next: NextFu
 	}
 };
 
+// Get owner dashboard stats
+export const getOwnerDashboardStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+	try {
+		// Check if user is facility owner
+		if (req.user.role !== "facility_owner") {
+			throw new AppError("Only facility owners can access this endpoint", 403);
+		}
+
+		// Get all venues owned by this user
+		const ownerVenues = await Venue.find({
+			ownerId: req.user._id,
+			isActive: true,
+		}).populate("courts");
+
+		const venueIds = ownerVenues.map((v) => v._id);
+
+		// Calculate active courts
+		let totalActiveCourts = 0;
+		ownerVenues.forEach((venue: any) => {
+			if (venue.courts) {
+				totalActiveCourts += venue.courts.filter((court: any) => court.isActive).length;
+			}
+		});
+
+		// Get all bookings for owner's venues
+		const bookings = await Booking.find({
+			venueId: { $in: venueIds },
+		});
+
+		// Calculate booking stats
+		const now = new Date();
+		const today = new Date(now.setHours(0, 0, 0, 0));
+		const tomorrow = new Date(today);
+		tomorrow.setDate(tomorrow.getDate() + 1);
+
+		const todayBookings = bookings.filter((b) => {
+			const bookingDate = new Date(b.bookingDate);
+			bookingDate.setHours(0, 0, 0, 0);
+			return bookingDate.getTime() === today.getTime() && b.status === BookingStatus.CONFIRMED;
+		});
+
+		const upcomingBookings = bookings.filter((b) => {
+			const bookingDate = new Date(b.bookingDate);
+			return bookingDate >= tomorrow && b.status === BookingStatus.CONFIRMED;
+		});
+
+		const completedBookings = bookings.filter((b) => b.status === BookingStatus.COMPLETED);
+		const cancelledBookings = bookings.filter((b) => b.status === BookingStatus.CANCELLED);
+
+		// Calculate earnings (completed bookings only)
+		const totalRevenue = completedBookings.reduce((sum, booking) => sum + booking.totalAmount, 0);
+		const adminCommission = totalRevenue * 0.1; // 10% admin commission
+		const netEarnings = totalRevenue - adminCommission;
+
+		// This month's stats
+		const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+		const thisMonthBookings = bookings.filter((b) => {
+			const bookingDate = new Date(b.bookingDate);
+			return bookingDate >= thisMonthStart && b.status !== BookingStatus.CANCELLED;
+		});
+
+		const thisMonthRevenue = completedBookings
+			.filter((b) => new Date(b.bookingDate) >= thisMonthStart)
+			.reduce((sum, booking) => sum + booking.totalAmount, 0);
+		const thisMonthNetEarnings = thisMonthRevenue * 0.9; // After 10% commission
+
+		res.status(200).json({
+			success: true,
+			stats: {
+				venues: {
+					total: ownerVenues.length,
+					approved: ownerVenues.filter((v) => v.status === "approved").length,
+					pending: ownerVenues.filter((v) => v.status === "pending").length,
+					rejected: ownerVenues.filter((v) => v.status === "rejected").length,
+				},
+				bookings: {
+					total: bookings.length,
+					today: todayBookings.length,
+					upcoming: upcomingBookings.length,
+					completed: completedBookings.length,
+					cancelled: cancelledBookings.length,
+					thisMonth: thisMonthBookings.length,
+				},
+				courts: {
+					totalActive: totalActiveCourts,
+				},
+				earnings: {
+					totalRevenue,
+					adminCommission,
+					netEarnings,
+					thisMonthRevenue,
+					thisMonthNetEarnings,
+				},
+			},
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 // Get booking details
 export const getBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
 	try {

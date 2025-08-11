@@ -5,6 +5,7 @@ import {
 	getUserBookings,
 	getVenueBookings,
 	getOwnerBookings,
+	getOwnerDashboardStats,
 	getBookingDetails,
 	cancelBooking,
 } from "../controllers/booking.controller";
@@ -17,6 +18,7 @@ router.use(authenticate);
 // Booking operations
 router.post("/", createBooking);
 router.get("/user", getUserBookings);
+router.get("/owner/stats", getOwnerDashboardStats);
 router.get("/owner", getOwnerBookings);
 router.get("/venue/:venueId", getVenueBookings);
 router.get("/:bookingId", getBookingDetails);
