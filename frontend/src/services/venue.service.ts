@@ -24,6 +24,7 @@ export interface Venue {
 	amenities: string[];
 	images: string[];
 	status?: string;
+	rejectionReason?: string;
 	isActive?: boolean;
 	createdAt?: string;
 	updatedAt?: string;

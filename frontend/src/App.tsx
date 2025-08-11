@@ -22,12 +22,15 @@ import MyVenues from "@/pages/owner/MyVenues";
 import CreateVenue from "@/pages/owner/CreateVenue";
 import EditVenue from "@/pages/owner/EditVenue";
 import VenueDetails from "@/pages/venue/VenueDetails";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import FacilityApproval from "@/pages/admin/FacilityApproval";
 import ComingSoon from "@/pages/ComingSoon";
 
 // Components
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import AdminVenueDetails from "./pages/admin/AdminVenueDetails";
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -97,11 +100,11 @@ function App() {
 										</ProtectedRoute>
 									}
 								>
-									<Route path="dashboard" element={<ComingSoon />} />
-									<Route path="venues" element={<ComingSoon />} />
+									<Route path="dashboard" element={<AdminDashboard />} />
+									<Route path="venues/approval" element={<FacilityApproval />} />
+									<Route path="venues/:id" element={<AdminVenueDetails />} />
 									<Route path="users" element={<ComingSoon />} />
 									<Route path="bookings" element={<ComingSoon />} />
-									<Route path="settings" element={<ComingSoon />} />
 									<Route index element={<Navigate to="/admin/dashboard" replace />} />
 								</Route>
 

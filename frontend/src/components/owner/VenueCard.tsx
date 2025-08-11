@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Edit, Trash2, Eye, MapPin, Clock, Building2 } from "lucide-react";
+import { Edit, Trash2, Eye, MapPin, Clock, Building2, AlertCircle } from "lucide-react";
 import { formatSportLabel } from "@/utils/sport-formatter";
 import type { Venue } from "@/services/venue.service";
 
@@ -14,11 +14,11 @@ const VenueCard = ({ venue, onDelete }: VenueCardProps) => {
 	const getStatusStyles = (status?: string) => {
 		switch (status) {
 			case "pending":
-				return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20";
+				return "bg-yellow-500/90 text-white border-yellow-600";
 			case "approved":
-				return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
+				return "bg-green-500/90 text-white border-green-600";
 			case "rejected":
-				return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+				return "bg-red-500/90 text-white border-red-600";
 			default:
 				return "";
 		}
@@ -67,7 +67,7 @@ const VenueCard = ({ venue, onDelete }: VenueCardProps) => {
 				{/* Status Badge */}
 				{venue.status && (
 					<div
-						className={`absolute top-2 right-2 px-2 py-1 rounded-md text-xs font-medium border ${getStatusStyles(
+						className={`absolute top-2 right-2 px-2.5 py-1 rounded-md text-xs font-semibold border backdrop-blur-sm ${getStatusStyles(
 							venue.status,
 						)}`}
 					>
@@ -93,6 +93,17 @@ const VenueCard = ({ venue, onDelete }: VenueCardProps) => {
 						</span>
 					</div>
 				</div>
+
+				{/* Rejection Notice */}
+				{venue.status === "rejected" && venue.rejectionReason && (
+					<div className="flex items-start gap-2 p-2 rounded-md bg-red-500/10 border border-red-500/20">
+						<AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+						<div className="flex-1">
+							<p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">Admin Feedback:</p>
+							<p className="text-xs text-muted-foreground line-clamp-2">{venue.rejectionReason}</p>
+						</div>
+					</div>
+				)}
 
 				{/* Description */}
 				<p className="text-sm text-muted-foreground line-clamp-2">{venue.description}</p>

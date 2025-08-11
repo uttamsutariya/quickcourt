@@ -9,6 +9,7 @@ import { errorHandler } from "./middleware/error.middleware";
 import authRoutes from "./routes/auth.routes";
 import uploadRoutes from "./routes/upload.routes";
 import venueRoutes from "./routes/venue.routes";
+import adminRoutes from "./routes/admin.routes";
 
 // Create Express app
 const app: Application = express();
@@ -49,6 +50,7 @@ app.get("/health", (_req: Request, res: Response) => {
 app.use(`${config.app.apiPrefix}/auth`, authRoutes);
 app.use(`${config.app.apiPrefix}/upload`, uploadRoutes);
 app.use(`${config.app.apiPrefix}/venues`, venueRoutes);
+app.use(`${config.app.apiPrefix}/admin`, adminRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

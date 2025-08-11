@@ -120,6 +120,7 @@ const VenueDetails = () => {
 	const isAdmin = user?.role === "admin";
 	const isEndUser = user?.role === "user";
 	const canEdit = isOwner || isAdmin;
+	const isRejected = venue?.status === "rejected";
 
 	if (loading) {
 		return (
@@ -169,6 +170,26 @@ const VenueDetails = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Rejection Notice for Owner */}
+			{isRejected && isOwner && venue.rejectionReason && (
+				<div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/5 p-4">
+					<div className="flex items-start gap-3">
+						<XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+						<div className="flex-1">
+							<h3 className="text-base font-semibold mb-1">Venue Rejected</h3>
+							<p className="text-sm text-muted-foreground mb-2">
+								Your venue registration has been rejected by the admin. Please review the reason below and make
+								necessary changes before resubmitting.
+							</p>
+							<div className="mt-3 p-3 rounded-md bg-background/50 border border-border">
+								<p className="text-sm font-medium mb-1">Rejection Reason:</p>
+								<p className="text-sm text-muted-foreground">{venue.rejectionReason}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{/* Venue Info */}
 			<div className="grid lg:grid-cols-3 gap-6">
