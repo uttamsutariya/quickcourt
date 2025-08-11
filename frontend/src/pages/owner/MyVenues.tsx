@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Loader2, Building2 } from "lucide-react";
+import { Plus, Loader2, Building2, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -85,6 +85,12 @@ const MyVenues = () => {
 
 	return (
 		<div className="container mx-auto p-6">
+			{/* Back Button */}
+			<Button variant="ghost" onClick={() => navigate("/owner/dashboard")} className="mb-4">
+				<ChevronLeft className="mr-2 h-4 w-4" />
+				Back to Dashboard
+			</Button>
+
 			{/* Header */}
 			<div className="flex justify-between items-center mb-8">
 				<div>

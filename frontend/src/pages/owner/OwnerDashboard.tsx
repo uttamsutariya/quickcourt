@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-	Building2,
-	Plus,
-	Calendar,
-	TrendingUp,
-	Users,
-	Clock,
-	DollarSign,
-	CheckCircle,
-	XCircle,
-	AlertCircle,
-} from "lucide-react";
+import { Building2, Plus, Calendar, TrendingUp, Users, Clock, DollarSign, CheckCircle, XCircle } from "lucide-react";
 import useAuthStore from "@/stores/auth-store";
 import venueService, { type Venue } from "@/services/venue.service";
 import { Button } from "@/components/ui/button";
@@ -117,18 +106,18 @@ const OwnerDashboard = () => {
 					<Skeleton className="h-8 w-64" />
 					<Skeleton className="h-4 w-48 mt-2" />
 				</div>
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
 					{[1, 2, 3, 4].map((i) => (
-						<Card key={i}>
-							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<Skeleton className="h-4 w-20" />
-								<Skeleton className="h-8 w-8 rounded" />
-							</CardHeader>
-							<CardContent>
-								<Skeleton className="h-6 w-16" />
-								<Skeleton className="h-3 w-24 mt-1" />
-							</CardContent>
-						</Card>
+						<div key={i} className="bg-card border rounded-lg p-4">
+							<div className="flex items-start justify-between">
+								<div className="flex-1">
+									<Skeleton className="h-4 w-20 mb-2" />
+									<Skeleton className="h-7 w-16 mb-1" />
+									<Skeleton className="h-3 w-24" />
+								</div>
+								<Skeleton className="h-8 w-8 rounded-lg" />
+							</div>
+						</div>
 					))}
 				</div>
 			</div>
@@ -144,38 +133,38 @@ const OwnerDashboard = () => {
 			</div>
 
 			{/* Venue Stats Grid */}
-			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
 				{statsCards.map((stat) => (
-					<Card key={stat.title} className="hover:shadow-lg transition-shadow">
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+					<div key={stat.title} className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
+						<div className="flex items-start justify-between">
+							<div className="flex-1">
+								<p className="text-sm text-muted-foreground">{stat.title}</p>
+								<p className="text-2xl font-bold mt-1">{stat.value}</p>
+								<p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+							</div>
 							<div className={`p-2 rounded-lg ${stat.bgColor}`}>
 								<stat.icon className={`h-4 w-4 ${stat.color}`} />
 							</div>
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">{stat.value}</div>
-							<p className="text-xs text-muted-foreground">{stat.description}</p>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				))}
 			</div>
 
 			{/* Additional Stats (Placeholders) */}
-			<div className="grid gap-6 md:grid-cols-3 mb-8">
+			<div className="grid gap-4 md:grid-cols-3 mb-6">
 				{placeholderStats.map((stat) => (
-					<Card key={stat.title}>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+					<div key={stat.title} className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
+						<div className="flex items-start justify-between">
+							<div className="flex-1">
+								<p className="text-sm text-muted-foreground">{stat.title}</p>
+								<p className="text-2xl font-bold mt-1">{stat.value}</p>
+								<p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+							</div>
 							<div className={`p-2 rounded-lg ${stat.bgColor}`}>
 								<stat.icon className={`h-4 w-4 ${stat.color}`} />
 							</div>
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">{stat.value}</div>
-							<p className="text-xs text-muted-foreground">{stat.description}</p>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				))}
 			</div>
 

@@ -9,10 +9,12 @@ import {
 	Calendar,
 	CheckCircle,
 	XCircle,
-	Shield,
 	Wifi,
 	Car,
 	Loader2,
+	Eye,
+	X,
+	ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +28,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
 import venueService, { type Venue } from "@/services/venue.service";
 import { formatSportLabel } from "@/utils/sport-formatter";
 import useAuthStore from "@/stores/auth-store";
@@ -47,6 +49,7 @@ const VenueDetails = () => {
 	const [loading, setLoading] = useState(true);
 	const [deleteDialog, setDeleteDialog] = useState(false);
 	const [deleting, setDeleting] = useState(false);
+	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (id) {
@@ -166,40 +169,6 @@ const VenueDetails = () => {
 					</div>
 				)}
 			</div>
-
-			{/* Image Gallery */}
-			{venue.images && venue.images.length > 0 ? (
-				<Card className="overflow-hidden mb-6">
-					<Carousel className="w-full">
-						<CarouselContent>
-							{venue.images.map((image, index) => (
-								<CarouselItem key={index}>
-									<div className="aspect-video">
-										<img
-											src={image}
-											alt={`${venue.name} - Image ${index + 1}`}
-											className="w-full h-full object-cover"
-										/>
-									</div>
-								</CarouselItem>
-							))}
-						</CarouselContent>
-						{venue.images.length > 1 && (
-							<>
-								<CarouselPrevious className="left-4" />
-								<CarouselNext className="right-4" />
-							</>
-						)}
-					</Carousel>
-				</Card>
-			) : (
-				<Card className="aspect-video mb-6 flex items-center justify-center bg-muted">
-					<div className="text-center">
-						<Shield className="h-16 w-16 text-muted-foreground mx-auto mb-2" />
-						<p className="text-muted-foreground">No images available</p>
-					</div>
-				</Card>
-			)}
 
 			{/* Venue Info */}
 			<div className="grid lg:grid-cols-3 gap-6">
@@ -331,6 +300,57 @@ const VenueDetails = () => {
 					)}
 				</div>
 			</div>
+
+			{/* Image Gallery */}
+			<Card className="mt-6 overflow-hidden">
+				<CardHeader>
+					<CardTitle>Venue Images</CardTitle>
+				</CardHeader>
+				<CardContent>
+					{venue.images && venue.images.length > 0 ? (
+						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+							{venue.images.map((image, index) => (
+								<div
+									key={index}
+									className="relative group cursor-pointer overflow-hidden rounded-lg aspect-square bg-muted"
+									onClick={() => setSelectedImage(image)}
+								>
+									<img
+										src={image}
+										alt={`${venue.name} - Image ${index + 1}`}
+										className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+									/>
+									<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+										<Eye className="h-8 w-8 text-white" />
+									</div>
+								</div>
+							))}
+						</div>
+					) : (
+						<div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+							<ImageIcon className="h-12 w-12 mb-3" />
+							<p>No images available</p>
+						</div>
+					)}
+				</CardContent>
+			</Card>
+
+			{/* Image View Modal */}
+			<Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+				<DialogContent className="max-w-4xl p-0">
+					<div className="relative">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="absolute right-2 top-2 z-10 bg-background/80 hover:bg-background"
+							onClick={() => setSelectedImage(null)}
+						>
+							<X className="h-4 w-4" />
+						</Button>
+						{selectedImage && <img src={selectedImage} alt={`${venue.name} - Full view`} className="w-full h-auto" />}
+					</div>
+				</DialogContent>
+			</Dialog>
 
 			{/* Delete Confirmation Dialog */}
 			<Dialog open={deleteDialog} onOpenChange={setDeleteDialog}>
