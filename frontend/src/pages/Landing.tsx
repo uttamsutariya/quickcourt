@@ -77,8 +77,50 @@ const Landing = () => {
 		scrollToIndex(newIndex);
 	};
 
+	const [sportsCurrentIndex, setSportsCurrentIndex] = useState(0);
+	const sportsCarouselRef = useRef<HTMLDivElement>(null);
+	const [canScrollSportsLeft, setCanScrollSportsLeft] = useState(false);
+	const [canScrollSportsRight, setCanScrollSportsRight] = useState(true);
+
 	const handleSportClick = (sportId: string) => {
 		navigate(`/venues?sport=${sportId}`);
+	};
+
+	const scrollSportsToIndex = (index: number) => {
+		if (sportsCarouselRef.current) {
+			const cardWidth = 280; // Card width + gap
+			sportsCarouselRef.current.scrollTo({
+				left: index * cardWidth,
+				behavior: "smooth",
+			});
+			setSportsCurrentIndex(index);
+		}
+	};
+
+	const handleSportsScroll = () => {
+		if (sportsCarouselRef.current) {
+			const { scrollLeft, scrollWidth, clientWidth } = sportsCarouselRef.current;
+			setCanScrollSportsLeft(scrollLeft > 0);
+			setCanScrollSportsRight(scrollLeft < scrollWidth - clientWidth - 10);
+
+			// Update current index based on scroll position
+			const cardWidth = 280;
+			const newIndex = Math.round(scrollLeft / cardWidth);
+			setSportsCurrentIndex(newIndex);
+		}
+	};
+
+	const handleSportsPrevSlide = () => {
+		const newIndex = Math.max(0, sportsCurrentIndex - 1);
+		scrollSportsToIndex(newIndex);
+	};
+
+	const handleSportsNextSlide = () => {
+		const cardsPerView =
+			window.innerWidth >= 1280 ? 4 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1;
+		const maxIndex = Math.max(0, popularSports.length - cardsPerView);
+		const newIndex = Math.min(maxIndex, sportsCurrentIndex + 1);
+		scrollSportsToIndex(newIndex);
 	};
 
 	return (
@@ -280,42 +322,127 @@ const Landing = () => {
 			<section className="py-16 lg:py-24">
 				<div className="container mx-auto px-4">
 					{/* Section Header */}
-					<div className="text-center mb-12">
-						<h2 className="text-3xl lg:text-4xl font-bold mb-2">Popular Sports</h2>
-						<p className="text-muted-foreground">Choose your favorite sport and find the perfect venue</p>
+					<div className="flex items-center justify-between mb-12">
+						<div>
+							<h2 className="text-3xl lg:text-4xl font-bold mb-2">Popular Sports</h2>
+							<p className="text-muted-foreground">Choose your favorite sport and find the perfect venue</p>
+						</div>
+						<Button variant="outline" onClick={() => navigate("/venues")} className="hidden sm:flex">
+							Browse All Sports
+							<ArrowRight className="ml-2 h-4 w-4" />
+						</Button>
 					</div>
 
-					{/* Sports Grid */}
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-						{popularSports.map((sport) => {
-							const Icon = sport.icon;
-							return (
-								<Card
-									key={sport.id}
-									className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-									onClick={() => handleSportClick(sport.id)}
-								>
-									<CardContent className="p-6">
-										<div className="flex flex-col items-center text-center space-y-4">
-											<div
-												className={cn(
-													"w-20 h-20 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110",
-													sport.bgColor,
-												)}
-											>
-												<Icon className={cn("h-10 w-10", sport.iconColor)} />
+					{/* Sports Carousel */}
+					<div className="relative group">
+						{/* Carousel Container */}
+						<div className="relative overflow-hidden">
+							<div
+								ref={sportsCarouselRef}
+								className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+								onScroll={handleSportsScroll}
+								style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+							>
+								{popularSports.map((sport) => (
+									<div
+										key={sport.id}
+										className="w-64 flex-shrink-0 first:ml-0 last:mr-0 cursor-pointer"
+										onClick={() => handleSportClick(sport.id)}
+									>
+										<Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+											{/* Image Container with Overlay */}
+											<div className="relative h-40 overflow-hidden">
+												{/* Sport Image */}
+												<img
+													src={sport.image}
+													alt={sport.name}
+													className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+												/>
+
+												{/* Dark Overlay */}
+												<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 group-hover:from-black/80 group-hover:via-black/50 transition-all duration-300" />
+
+												{/* Sport Name Overlay */}
+												<div className="absolute inset-0 flex flex-col justify-end p-4">
+													<h3 className="text-white font-bold text-xl mb-1">{sport.name}</h3>
+													<p className="text-white/80 text-xs line-clamp-2">{sport.description}</p>
+												</div>
+
+												{/* Hover Indicator */}
+												<div className="absolute top-3 right-3 bg-white/10 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+													<ArrowRight className="h-4 w-4 text-white" />
+												</div>
 											</div>
-											<div>
-												<h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-													{sport.name}
-												</h3>
-												<p className="text-xs text-muted-foreground mt-1">{sport.description}</p>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							);
-						})}
+										</Card>
+									</div>
+								))}
+							</div>
+
+							{/* Gradient Edges for visual effect */}
+							{canScrollSportsLeft && (
+								<div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
+							)}
+							{canScrollSportsRight && (
+								<div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+							)}
+						</div>
+
+						{/* Navigation Buttons */}
+						{canScrollSportsLeft && (
+							<button
+								onClick={handleSportsPrevSlide}
+								className={cn(
+									"absolute left-2 top-1/2 -translate-y-1/2 z-20",
+									"bg-background/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg",
+									"hover:bg-background hover:shadow-xl transition-all duration-200",
+									"opacity-0 group-hover:opacity-100 focus:opacity-100",
+									"border border-border/50 hover:border-primary/20",
+								)}
+								aria-label="Previous sports"
+							>
+								<ChevronLeft className="h-5 w-5" />
+							</button>
+						)}
+						{canScrollSportsRight && (
+							<button
+								onClick={handleSportsNextSlide}
+								className={cn(
+									"absolute right-2 top-1/2 -translate-y-1/2 z-20",
+									"bg-background/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg",
+									"hover:bg-background hover:shadow-xl transition-all duration-200",
+									"opacity-0 group-hover:opacity-100 focus:opacity-100",
+									"border border-border/50 hover:border-primary/20",
+								)}
+								aria-label="Next sports"
+							>
+								<ChevronRight className="h-5 w-5" />
+							</button>
+						)}
+
+						{/* Dots Indicator for mobile */}
+						<div className="flex justify-center gap-1.5 mt-6 lg:hidden">
+							{Array.from({ length: Math.ceil(popularSports.length / 2) }).map((_, index) => (
+								<button
+									key={index}
+									onClick={() => scrollSportsToIndex(index * 2)}
+									className={cn(
+										"h-1.5 rounded-full transition-all duration-300",
+										Math.floor(sportsCurrentIndex / 2) === index
+											? "w-6 bg-primary"
+											: "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50",
+									)}
+									aria-label={`Go to sport group ${index + 1}`}
+								/>
+							))}
+						</div>
+					</div>
+
+					{/* Mobile CTA */}
+					<div className="mt-8 sm:hidden">
+						<Button variant="outline" className="w-full" onClick={() => navigate("/venues")}>
+							Browse All Sports
+							<ArrowRight className="ml-2 h-4 w-4" />
+						</Button>
 					</div>
 				</div>
 			</section>
@@ -363,30 +490,109 @@ const Landing = () => {
 			</section>
 
 			{/* CTA Section */}
-			<section className="py-16 lg:py-24">
-				<div className="container mx-auto px-4">
-					<Card className="gradient-primary text-white overflow-hidden">
-						<CardContent className="p-12 text-center space-y-6">
-							<h2 className="text-3xl lg:text-4xl font-bold">Ready to Play?</h2>
-							<p className="text-lg opacity-90 max-w-2xl mx-auto">
-								Join QuickCourt today and never miss a game. Find and book sports venues in seconds.
-							</p>
-							<div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-								<Button size="lg" variant="secondary" onClick={() => navigate("/auth/role-selection")}>
-									Get Started
-									<ArrowRight className="ml-2 h-5 w-5" />
-								</Button>
-								<Button
-									size="lg"
-									variant="outline"
-									className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-									onClick={() => navigate("/venues")}
-								>
-									Explore Venues
-								</Button>
+			<section className="py-16 lg:py-24 relative overflow-hidden">
+				<div className="container mx-auto px-4 relative z-10">
+					<div className="relative">
+						{/* Card with gradient background */}
+						<Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary via-primary/80 to-primary/60 dark:from-primary dark:via-primary/90 dark:to-secondary shadow-2xl">
+							{/* Animated Background Elements */}
+							<div className="absolute inset-0 overflow-hidden">
+								{/* Animated Gradient Orbs */}
+								<div className="absolute -top-24 -left-24 w-96 h-96 bg-white/20 dark:bg-white/10 rounded-full blur-3xl animate-pulse" />
+								<div className="absolute -bottom-24 -right-24 w-96 h-96 bg-white/30 dark:bg-secondary/30 rounded-full blur-3xl animate-pulse delay-700" />
+								<div className="absolute top-1/2 left-1/3 w-72 h-72 bg-white/15 dark:bg-white/5 rounded-full blur-2xl animate-pulse delay-300" />
+
+								{/* Moving Gradient Blobs */}
+								<div className="absolute inset-0">
+									<div className="absolute top-10 left-20 w-64 h-64 bg-gradient-to-br from-white/30 dark:from-white/10 to-transparent rounded-full blur-2xl animate-blob" />
+									<div className="absolute bottom-10 right-20 w-72 h-72 bg-gradient-to-tr from-white/25 dark:from-secondary/20 to-transparent rounded-full blur-2xl animate-blob animation-delay-2000" />
+									<div className="absolute top-1/3 right-1/3 w-56 h-56 bg-gradient-to-bl from-white/20 dark:from-white/10 to-transparent rounded-full blur-xl animate-blob animation-delay-4000" />
+								</div>
+
+								{/* Subtle Grid Pattern */}
+								<div
+									className="absolute inset-0 opacity-20 dark:opacity-10"
+									style={{
+										backgroundImage: `linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)`,
+										backgroundSize: "50px 50px",
+									}}
+								/>
+
+								{/* Radial Gradient Overlay */}
+								<div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/10 dark:to-black/20" />
 							</div>
-						</CardContent>
-					</Card>
+
+							{/* Content */}
+							<CardContent className="relative p-12 lg:p-16 text-center space-y-8 z-10">
+								{/* Badge */}
+								<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20">
+									<Sparkles className="h-4 w-4 text-white animate-pulse" />
+									<span className="text-sm font-medium text-white">Join thousands of players</span>
+								</div>
+
+								{/* Main Heading with Gradient Text Effect */}
+								<div className="space-y-2">
+									<h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white">Ready to Play?</h2>
+									<div className="h-1 w-24 mx-auto bg-gradient-to-r from-white/0 via-white/50 to-white/0" />
+								</div>
+
+								{/* Description */}
+								<p className="text-lg lg:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+									Join QuickCourt today and never miss a game. Find and book sports venues in seconds.
+								</p>
+
+								{/* CTA Buttons */}
+								<div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+									<Button
+										size="lg"
+										className="bg-white text-primary hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+										onClick={() => navigate("/auth/role-selection")}
+									>
+										<Sparkles className="mr-2 h-5 w-5" />
+										Get Started Now
+										<ArrowRight className="ml-2 h-5 w-5" />
+									</Button>
+									<Button
+										size="lg"
+										variant="outline"
+										className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:border-white/40 shadow-lg transition-all duration-300 hover:scale-105"
+										onClick={() => navigate("/venues")}
+									>
+										Explore Venues
+										<MapPin className="ml-2 h-5 w-5" />
+									</Button>
+								</div>
+
+								{/* Trust Indicators */}
+								<div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8 text-white/80">
+									<div className="flex items-center gap-2">
+										<Users className="h-5 w-5" />
+										<span className="text-sm">10,000+ Active Users</span>
+									</div>
+									<div className="hidden sm:block w-1 h-1 bg-white/40 rounded-full" />
+									<div className="flex items-center gap-2">
+										<Star className="h-5 w-5" />
+										<span className="text-sm">4.8/5 Average Rating</span>
+									</div>
+									<div className="hidden sm:block w-1 h-1 bg-white/40 rounded-full" />
+									<div className="flex items-center gap-2">
+										<Clock className="h-5 w-5" />
+										<span className="text-sm">Instant Booking</span>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+
+						{/* Decorative Elements Outside Card */}
+						<div className="absolute -top-4 -left-4 w-24 h-24 bg-primary/30 dark:bg-primary/20 rounded-full blur-2xl" />
+						<div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/25 dark:bg-secondary/20 rounded-full blur-2xl" />
+					</div>
+				</div>
+
+				{/* Background Decorative Elements */}
+				<div className="absolute inset-0 -z-10">
+					<div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 dark:bg-primary/5 rounded-full blur-3xl" />
+					<div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 dark:bg-secondary/5 rounded-full blur-3xl" />
 				</div>
 			</section>
 		</div>
