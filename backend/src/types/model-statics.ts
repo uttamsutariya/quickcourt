@@ -1,7 +1,7 @@
 // Static method interfaces for Mongoose models
 
 import { Model, Types } from "mongoose";
-import { IUser, IVenue, ICourt, IBooking, ICourtUnavailability, IAdminSettings } from "./interfaces";
+import { IUser, IVenue, ICourt, IBooking, ICourtUnavailability, IAdminSettings, IReview } from "./interfaces";
 
 // User Model Statics
 export interface IUserModel extends Model<IUser> {
@@ -42,4 +42,16 @@ export interface ICourtUnavailabilityModel extends Model<ICourtUnavailability> {
 export interface IAdminSettingsModel extends Model<IAdminSettings> {
 	getSettings(): Promise<IAdminSettings>;
 	updateSettings(updates: Partial<IAdminSettings>): Promise<IAdminSettings>;
+}
+
+// Review Model Statics
+export interface IReviewModel extends Model<IReview> {
+	findByVenue(venueId: Types.ObjectId, includeInactive?: boolean): Promise<IReview[]>;
+	findByUser(userId: Types.ObjectId): Promise<IReview[]>;
+	hasUserReviewedVenue(userId: Types.ObjectId, venueId: Types.ObjectId): Promise<boolean>;
+	getVenueRatingStats(venueId: Types.ObjectId): Promise<{
+		averageRating: number;
+		totalReviews: number;
+		ratingCounts: { [key: number]: number };
+	}>;
 }

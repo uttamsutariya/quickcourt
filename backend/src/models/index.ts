@@ -6,6 +6,7 @@ export { Court } from "./Court.model";
 export { Booking } from "./Booking.model";
 export { CourtUnavailability } from "./CourtUnavailability.model";
 export { AdminSettings } from "./AdminSettings.model";
+export { Review } from "./Review.model";
 
 // Re-export types and enums for convenience
 export * from "../types/interfaces";

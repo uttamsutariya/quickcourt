@@ -39,6 +39,7 @@ import { VenueType } from "@/types/enums";
 import useAuthStore from "@/stores/auth-store";
 import { toast } from "sonner";
 import BookingModal from "@/components/booking/BookingModal";
+import VenueReviews from "@/components/venue/VenueReviews";
 
 // Amenity icons mapping
 const AMENITY_ICONS: Record<string, any> = {
@@ -63,6 +64,13 @@ const VenueDetails = () => {
 			fetchVenueDetails();
 		}
 	}, [id]);
+
+	// Check if current user is the owner
+	const isOwner = user && venue && venue.ownerId === user._id;
+	const isAdmin = user?.role === "admin";
+	const isEndUser = user?.role === "user";
+	const canEdit = isOwner || isAdmin;
+	const isRejected = venue?.status === "rejected";
 
 	const fetchVenueDetails = async () => {
 		try {
@@ -150,13 +158,6 @@ const VenueDetails = () => {
 				};
 		}
 	};
-
-	// Check if current user is the owner
-	const isOwner = user && venue && venue.ownerId === user._id;
-	const isAdmin = user?.role === "admin";
-	const isEndUser = user?.role === "user";
-	const canEdit = isOwner || isAdmin;
-	const isRejected = venue?.status === "rejected";
 
 	if (loading) {
 		return (
@@ -327,16 +328,18 @@ const VenueDetails = () => {
 						</CardContent>
 					</Card>
 
-					{/* Action Button */}
+					{/* Action Buttons */}
 					{isEndUser && venue.status === "approved" && (
-						<Button
-							className="w-full gradient-primary text-primary-foreground cursor-pointer"
-							size="lg"
-							onClick={() => setShowBookingModal(true)}
-						>
-							<Calendar className="mr-2 h-5 w-5" />
-							Book Now
-						</Button>
+						<div className="space-y-3">
+							<Button
+								className="w-full gradient-primary text-primary-foreground cursor-pointer"
+								size="lg"
+								onClick={() => setShowBookingModal(true)}
+							>
+								<Calendar className="mr-2 h-5 w-5" />
+								Book Now
+							</Button>
+						</div>
 					)}
 
 					{/* Owner Info for Admin */}
@@ -384,6 +387,13 @@ const VenueDetails = () => {
 							<p>No images available</p>
 						</div>
 					)}
+				</CardContent>
+			</Card>
+
+			{/* Reviews Section */}
+			<Card className="mt-6">
+				<CardContent className="p-6">
+					<VenueReviews venueId={venue._id!} venueName={venue.name} />
 				</CardContent>
 			</Card>
 

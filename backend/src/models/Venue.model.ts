@@ -138,6 +138,13 @@ venueSchema.virtual("bookings", {
 	foreignField: "venueId",
 });
 
+// Virtual for reviews
+venueSchema.virtual("reviews", {
+	ref: "Review",
+	localField: "_id",
+	foreignField: "venueId",
+});
+
 // Methods
 venueSchema.methods.isApproved = function (): boolean {
 	return this.status === VenueStatus.APPROVED;

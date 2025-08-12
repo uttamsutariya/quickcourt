@@ -136,6 +136,18 @@ export interface IAdminSettings extends Document {
 	calculateOwnerEarnings(amount: number): number;
 }
 
+// Review Interface
+export interface IReview extends Document {
+	userId: Types.ObjectId;
+	venueId: Types.ObjectId;
+	bookingId: Types.ObjectId;
+	rating: number; // 1-5 stars
+	comment: string;
+	isActive: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 // Helper interface for available slots (not a DB model)
 export interface IAvailableSlot {
 	date: Date;

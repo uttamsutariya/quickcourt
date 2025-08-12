@@ -5,6 +5,11 @@ import { UnauthorizedError, ForbiddenError } from "../utils/errors";
 import { UserRole } from "../types/enums";
 
 // Extend Express Request type to include user
+export interface AuthenticatedRequest extends Request {
+	user?: any; // MongoDB user document
+	workosUser?: WorkOSUser; // WorkOS user data
+}
+
 declare global {
 	namespace Express {
 		interface Request {
@@ -138,6 +143,9 @@ export const authorize = (...allowedRoles: UserRole[]) => {
 		next();
 	};
 };
+
+// Export authenticate as authMiddleware for consistency with other files
+export const authMiddleware = authenticate;
 
 /**
  * Check if user owns the resource or is admin
