@@ -63,7 +63,11 @@ const CreateVenue = () => {
 		switch (step) {
 			case 1:
 				if (!formData.name?.trim()) newErrors.name = "Venue name is required";
+				if (formData.name?.trim().length && formData.name?.trim().length < 3)
+					newErrors.name = "Venue name must be at least 3 characters long";
 				if (!formData.description?.trim()) newErrors.description = "Description is required";
+				if (formData.description?.trim().length && formData.description?.trim().length < 10)
+					newErrors.description = "Description must be at least 10 characters long";
 				if (!formData.venueType) newErrors.venueType = "Venue type is required";
 				break;
 			case 2:

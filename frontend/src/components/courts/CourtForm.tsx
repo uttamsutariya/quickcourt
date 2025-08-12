@@ -178,29 +178,6 @@ const CourtForm = ({ open, onClose, onSubmit, court, availableSports }: CourtFor
 							)}
 						/>
 
-						<FormField
-							control={form.control}
-							name="defaultPrice"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Default Price per Slot (₹)</FormLabel>
-									<FormControl>
-										<Input
-											type="number"
-											placeholder="500"
-											{...field}
-											onChange={(e) => field.onChange(Number(e.target.value))}
-											disabled={isSubmitting}
-										/>
-									</FormControl>
-									<FormDescription>
-										Base price per slot. You can set different prices for specific days later.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
 						<DialogFooter>
 							<Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
 								Cancel

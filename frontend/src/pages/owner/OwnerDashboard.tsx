@@ -191,11 +191,11 @@ const OwnerDashboard = () => {
 							</div>
 							<div className="space-y-1">
 								<p className="text-sm text-muted-foreground">Today</p>
-								<p className="text-2xl font-bold text-primary">{stats.bookings.today}</p>
+								<p className="text-2xl font-bold">{stats.bookings.today}</p>
 							</div>
 							<div className="space-y-1">
 								<p className="text-sm text-muted-foreground">This Month</p>
-								<p className="text-2xl font-bold text-primary">{stats.bookings.thisMonth}</p>
+								<p className="text-2xl font-bold">{stats.bookings.thisMonth}</p>
 							</div>
 							<div className="space-y-1">
 								<p className="text-sm text-muted-foreground flex items-center gap-1">
