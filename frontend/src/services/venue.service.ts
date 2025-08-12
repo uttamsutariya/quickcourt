@@ -1,4 +1,5 @@
 import apiClient from "@/lib/api-client";
+import { sanitizeSportIds, autoFixSportIds } from "@/utils/sport-validator";
 
 export interface Address {
 	street: string;
@@ -52,6 +53,13 @@ export interface VenueResponse {
 
 class VenueService {
 	async createVenue(data: Partial<Venue>): Promise<VenueResponse> {
+		// Auto-fix and validate sport IDs before sending to backend
+		if (data.sports) {
+			const fixedSports = autoFixSportIds(data.sports);
+			const sanitizedSports = sanitizeSportIds(fixedSports, "venue creation");
+			data = { ...data, sports: sanitizedSports };
+		}
+
 		const response = await apiClient.post<VenueResponse>("/venues", data);
 		return response.data;
 	}
@@ -67,6 +75,13 @@ class VenueService {
 	}
 
 	async updateVenue(id: string, data: Partial<Venue>): Promise<VenueResponse> {
+		// Auto-fix and validate sport IDs before sending to backend
+		if (data.sports) {
+			const fixedSports = autoFixSportIds(data.sports);
+			const sanitizedSports = sanitizeSportIds(fixedSports, "venue update");
+			data = { ...data, sports: sanitizedSports };
+		}
+
 		const response = await apiClient.put<VenueResponse>(`/venues/${id}`, data);
 		return response.data;
 	}

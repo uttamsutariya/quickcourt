@@ -14,25 +14,10 @@ import { VenueType } from "@/types/enums";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-// Map display names to backend enum values
-const SPORTS_OPTIONS = [
-	{ value: "cricket", label: "Cricket" },
-	{ value: "badminton", label: "Badminton" },
-	{ value: "tennis", label: "Tennis" },
-	{ value: "table_tennis", label: "Table Tennis" },
-	{ value: "football", label: "Football" },
-	{ value: "basketball", label: "Basketball" },
-	{ value: "volleyball", label: "Volleyball" },
-	{ value: "swimming", label: "Swimming" },
-	{ value: "squash", label: "Squash" },
-	{ value: "hockey", label: "Hockey" },
-	{ value: "baseball", label: "Baseball" },
-	{ value: "golf", label: "Golf" },
-	{ value: "boxing", label: "Boxing" },
-	{ value: "gym_fitness", label: "Gym/Fitness" },
-	{ value: "yoga", label: "Yoga" },
-	{ value: "other", label: "Other" },
-];
+import { SPORTS_FORM_OPTIONS } from "@/config/sports";
+
+// Use centralized sports configuration to ensure consistency
+const SPORTS_OPTIONS = SPORTS_FORM_OPTIONS;
 
 const AMENITIES_OPTIONS = [
 	"Parking",

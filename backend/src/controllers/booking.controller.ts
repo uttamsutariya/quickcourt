@@ -581,6 +581,73 @@ export const getOwnerChartData = async (req: Request, res: Response, next: NextF
 	}
 };
 
+// Get user dashboard stats
+export const getUserDashboardStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+	try {
+		// Get all bookings for this user
+		const userBookings = await Booking.find({
+			userId: req.user._id,
+		});
+
+		// Calculate stats
+		const totalBookings = userBookings.length;
+
+		// Count unique venues visited
+		const uniqueVenueIds = new Set(userBookings.map((booking) => booking.venueId.toString()));
+		const venuesVisited = uniqueVenueIds.size;
+
+		// Get upcoming bookings
+		const now = new Date();
+		const upcomingBookings = userBookings.filter((booking) => {
+			const bookingDate = new Date(booking.bookingDate);
+			return bookingDate >= now && booking.status === BookingStatus.CONFIRMED;
+		}).length;
+
+		// Get completed bookings
+		const completedBookings = userBookings.filter((booking) => booking.status === BookingStatus.COMPLETED).length;
+
+		// Get cancelled bookings
+		const cancelledBookings = userBookings.filter((booking) => booking.status === BookingStatus.CANCELLED).length;
+
+		// Calculate total amount spent
+		const totalAmountSpent = userBookings
+			.filter((booking) => booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.COMPLETED)
+			.reduce((total, booking) => total + booking.totalAmount, 0);
+
+		// Get user's member since date
+		const user = req.user;
+		const memberSince = new Date(user.createdAt).toLocaleDateString("en-US", {
+			month: "short",
+			year: "numeric",
+		});
+
+		// Get recent bookings (last 5)
+		const recentBookings = await Booking.find({
+			userId: req.user._id,
+		})
+			.sort({ createdAt: -1 })
+			.limit(5)
+			.populate("venueId", "name address images")
+			.populate("courtId", "name sportType");
+
+		res.status(200).json({
+			success: true,
+			stats: {
+				totalBookings,
+				venuesVisited,
+				upcomingBookings,
+				completedBookings,
+				cancelledBookings,
+				totalAmountSpent,
+				memberSince,
+				recentBookings,
+			},
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 // Get booking details
 export const getBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
 	try {

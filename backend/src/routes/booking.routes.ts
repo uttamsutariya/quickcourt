@@ -3,6 +3,7 @@ import { authenticate } from "../middleware/auth.middleware";
 import {
 	createBooking,
 	getUserBookings,
+	getUserDashboardStats,
 	getVenueBookings,
 	getOwnerBookings,
 	getOwnerDashboardStats,
@@ -19,6 +20,7 @@ router.use(authenticate);
 // Booking operations
 router.post("/", createBooking);
 router.get("/user", getUserBookings);
+router.get("/user/stats", getUserDashboardStats);
 router.get("/owner/stats", getOwnerDashboardStats);
 router.get("/owner/charts", getOwnerChartData);
 router.get("/owner", getOwnerBookings);

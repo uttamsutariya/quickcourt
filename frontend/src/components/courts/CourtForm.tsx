@@ -36,7 +36,6 @@ const courtFormSchema = z.object({
 		SportType.BASEBALL,
 		SportType.GOLF,
 		SportType.BOXING,
-		SportType.GYM_FITNESS,
 		SportType.YOGA,
 		SportType.OTHER,
 	] as const),

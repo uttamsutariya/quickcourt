@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +12,37 @@ import PublicNavbar from "@/components/public/PublicNavbar";
 import Footer from "@/components/public/Footer";
 
 const RoleSelection = () => {
+	const navigate = useNavigate();
+	const { user, isAuthenticated, isLoading } = useAuthStore();
 	const { setSelectedRole } = useAuthStore();
 	const { signUp } = useAuth();
+
+	// Redirect authenticated users to their dashboard
+	useEffect(() => {
+		if (!isLoading && isAuthenticated && user) {
+			// Define role-based redirect paths
+			const roleRedirects = {
+				[USER_ROLES.USER]: "/user/dashboard",
+				[USER_ROLES.FACILITY_OWNER]: "/owner/dashboard",
+				[USER_ROLES.ADMIN]: "/admin/dashboard",
+			};
+
+			const redirectPath = roleRedirects[user.role] || "/";
+			navigate(redirectPath, { replace: true });
+		}
+	}, [isLoading, isAuthenticated, user, navigate]);
+
+	// Show loading state while checking authentication
+	if (isLoading) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+					<p className="text-muted-foreground">Checking authentication...</p>
+				</div>
+			</div>
+		);
+	}
 
 	const handleRoleSelection = async (role: typeof USER_ROLES.USER | typeof USER_ROLES.FACILITY_OWNER) => {
 		// Store selected role in Zustand store

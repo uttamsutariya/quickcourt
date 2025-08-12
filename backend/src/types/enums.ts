@@ -48,7 +48,6 @@ export enum SportType {
 	BASEBALL = "baseball",
 	GOLF = "golf",
 	BOXING = "boxing",
-	GYM_FITNESS = "gym_fitness",
 	YOGA = "yoga",
 	OTHER = "other",
 }

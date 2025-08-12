@@ -1,24 +1,5 @@
 // Sport enum value formatters
-
-// Map backend enum values to display labels
-const SPORT_LABELS: Record<string, string> = {
-	cricket: "Cricket",
-	badminton: "Badminton",
-	tennis: "Tennis",
-	table_tennis: "Table Tennis",
-	football: "Football",
-	basketball: "Basketball",
-	volleyball: "Volleyball",
-	swimming: "Swimming",
-	squash: "Squash",
-	hockey: "Hockey",
-	baseball: "Baseball",
-	golf: "Golf",
-	boxing: "Boxing",
-	gym_fitness: "Gym/Fitness",
-	yoga: "Yoga",
-	other: "Other",
-};
+import { getSportName, getSportNames } from "@/config/sports";
 
 /**
  * Format sport enum value to display label
@@ -26,7 +7,7 @@ const SPORT_LABELS: Record<string, string> = {
  * @returns Display label (e.g., "Table Tennis")
  */
 export const formatSportLabel = (sport: string): string => {
-	return SPORT_LABELS[sport] || sport;
+	return getSportName(sport);
 };
 
 /**
@@ -35,5 +16,5 @@ export const formatSportLabel = (sport: string): string => {
  * @returns Array of display labels
  */
 export const formatSportLabels = (sports: string[]): string[] => {
-	return sports.map(formatSportLabel);
+	return getSportNames(sports);
 };
