@@ -19,6 +19,7 @@ export const getAdminStats = async (_req: Request, res: Response, next: NextFunc
 			totalFacilityOwners,
 			totalBookings,
 			totalActiveCourts,
+			bookings,
 		] = await Promise.all([
 			// Venue statistics
 			Venue.countDocuments(),
@@ -35,7 +36,70 @@ export const getAdminStats = async (_req: Request, res: Response, next: NextFunc
 
 			// Active courts count
 			Court.countDocuments({ isActive: true }),
+
+			// Get all bookings for earnings calculation
+			Booking.find({ status: { $ne: "cancelled" } }).select("totalAmount createdAt"),
 		]);
+
+		// Calculate total earnings (10% commission)
+		const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+		const adminEarnings = totalRevenue * 0.1; // 10% commission
+
+		// Calculate this month's earnings
+		const currentMonth = new Date();
+		currentMonth.setDate(1);
+		currentMonth.setHours(0, 0, 0, 0);
+
+		const thisMonthBookings = await Booking.find({
+			status: { $ne: "cancelled" },
+			createdAt: { $gte: currentMonth },
+		}).select("totalAmount");
+
+		const thisMonthRevenue = thisMonthBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+		const thisMonthEarnings = thisMonthRevenue * 0.1;
+
+		// Generate daily data for the last 30 days
+		const thirtyDaysAgo = new Date();
+		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+		thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+		// Get bookings for the last 30 days
+		const recentBookings = await Booking.find({
+			status: { $ne: "cancelled" },
+			createdAt: { $gte: thirtyDaysAgo },
+		}).select("totalAmount createdAt");
+
+		// Group bookings by day
+		const dailyData: { [key: string]: { bookings: number; earnings: number } } = {};
+
+		// Initialize all days with 0 values
+		for (let i = 0; i < 30; i++) {
+			const date = new Date();
+			date.setDate(date.getDate() - i);
+			const dateKey = date.toISOString().split("T")[0];
+			dailyData[dateKey] = { bookings: 0, earnings: 0 };
+		}
+
+		// Fill in actual data
+		recentBookings.forEach((booking) => {
+			const dateKey = booking.createdAt.toISOString().split("T")[0];
+			if (dailyData[dateKey]) {
+				dailyData[dateKey].bookings += 1;
+				dailyData[dateKey].earnings += (booking.totalAmount || 0) * 0.1; // 10% commission
+			}
+		});
+
+		// Convert to arrays sorted by date (oldest first)
+		const sortedDates = Object.keys(dailyData).sort();
+		const dailyEarnings = sortedDates.map((date) => ({
+			date,
+			earnings: dailyData[date].earnings,
+		}));
+
+		const dailyBookings = sortedDates.map((date) => ({
+			date,
+			bookings: dailyData[date].bookings,
+		}));
 
 		res.status(200).json({
 			success: true,
@@ -55,6 +119,16 @@ export const getAdminStats = async (_req: Request, res: Response, next: NextFunc
 				},
 				courts: {
 					totalActive: totalActiveCourts,
+				},
+				earnings: {
+					totalRevenue,
+					adminEarnings,
+					thisMonthRevenue,
+					thisMonthEarnings,
+				},
+				charts: {
+					dailyEarnings,
+					dailyBookings,
 				},
 			},
 		});
