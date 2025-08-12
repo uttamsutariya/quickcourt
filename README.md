@@ -4,6 +4,10 @@
 
 QuickCourt is a comprehensive platform that enables sports enthusiasts to book local sports facilities (e.g., badminton courts, turf grounds, tennis tables) and create or join matches with others in their area. The platform provides a full-stack web application that facilitates an end-to-end booking experience with three distinct user roles: Users, Facility Owners, and Admins.
 
+## Video Demo Link
+
+https://www.loom.com/share/9c515a59d9dc4d93bd8b4b358870a76d?sid=833309f1-3ea8-4a89-9e94-df30dd66d1dc
+
 ## User Roles
 
 - **User** - Sports enthusiasts who book facilities
