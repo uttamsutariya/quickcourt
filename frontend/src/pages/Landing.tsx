@@ -18,6 +18,8 @@ const Landing = () => {
 	const carouselRef = useRef<HTMLDivElement>(null);
 	const [canScrollLeft, setCanScrollLeft] = useState(false);
 	const [canScrollRight, setCanScrollRight] = useState(true);
+	const [isHovering, setIsHovering] = useState(false);
+	const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
 	useEffect(() => {
 		const fetchTrendingVenues = async () => {
@@ -38,6 +40,39 @@ const Landing = () => {
 		};
 
 		fetchTrendingVenues();
+	}, []);
+
+	// Auto-scroll effect for trending venues
+	useEffect(() => {
+		if (!isLoading && trendingVenues.length > 0 && !isHovering) {
+			autoScrollIntervalRef.current = setInterval(() => {
+				const cardsPerView =
+					window.innerWidth >= 1280 ? 4 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1;
+				const maxIndex = Math.max(0, trendingVenues.length - cardsPerView);
+
+				setCurrentIndex((prevIndex) => {
+					const nextIndex = prevIndex >= maxIndex ? 0 : prevIndex + 1;
+					scrollToIndex(nextIndex);
+					return nextIndex;
+				});
+			}, 3000); // Scroll every 3 seconds
+		}
+
+		return () => {
+			if (autoScrollIntervalRef.current) {
+				clearInterval(autoScrollIntervalRef.current);
+				autoScrollIntervalRef.current = null;
+			}
+		};
+	}, [isLoading, trendingVenues.length, isHovering]);
+
+	// Cleanup interval on unmount
+	useEffect(() => {
+		return () => {
+			if (autoScrollIntervalRef.current) {
+				clearInterval(autoScrollIntervalRef.current);
+			}
+		};
 	}, []);
 
 	const scrollToIndex = (index: number) => {
@@ -81,6 +116,8 @@ const Landing = () => {
 	const sportsCarouselRef = useRef<HTMLDivElement>(null);
 	const [canScrollSportsLeft, setCanScrollSportsLeft] = useState(false);
 	const [canScrollSportsRight, setCanScrollSportsRight] = useState(true);
+	const [isSportsHovering, setIsSportsHovering] = useState(false);
+	const sportsAutoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
 	const handleSportClick = (sportId: string) => {
 		navigate(`/venues?sport=${sportId}`);
@@ -122,6 +159,39 @@ const Landing = () => {
 		const newIndex = Math.min(maxIndex, sportsCurrentIndex + 1);
 		scrollSportsToIndex(newIndex);
 	};
+
+	// Auto-scroll effect for sports carousel
+	useEffect(() => {
+		if (!isSportsHovering && popularSports.length > 0) {
+			sportsAutoScrollIntervalRef.current = setInterval(() => {
+				const cardsPerView =
+					window.innerWidth >= 1280 ? 4 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1;
+				const maxIndex = Math.max(0, popularSports.length - cardsPerView);
+
+				setSportsCurrentIndex((prevIndex) => {
+					const nextIndex = prevIndex >= maxIndex ? 0 : prevIndex + 1;
+					scrollSportsToIndex(nextIndex);
+					return nextIndex;
+				});
+			}, 4000); // Scroll every 4 seconds (slightly different from venues)
+		}
+
+		return () => {
+			if (sportsAutoScrollIntervalRef.current) {
+				clearInterval(sportsAutoScrollIntervalRef.current);
+				sportsAutoScrollIntervalRef.current = null;
+			}
+		};
+	}, [isSportsHovering, popularSports.length]);
+
+	// Cleanup sports interval on unmount
+	useEffect(() => {
+		return () => {
+			if (sportsAutoScrollIntervalRef.current) {
+				clearInterval(sportsAutoScrollIntervalRef.current);
+			}
+		};
+	}, []);
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -224,7 +294,11 @@ const Landing = () => {
 							))}
 						</div>
 					) : trendingVenues.length > 0 ? (
-						<div className="relative group">
+						<div
+							className="relative group"
+							onMouseEnter={() => setIsHovering(true)}
+							onMouseLeave={() => setIsHovering(false)}
+						>
 							{/* Carousel Container */}
 							<div className="relative overflow-hidden">
 								<div
@@ -334,7 +408,11 @@ const Landing = () => {
 					</div>
 
 					{/* Sports Carousel */}
-					<div className="relative group">
+					<div
+						className="relative group"
+						onMouseEnter={() => setIsSportsHovering(true)}
+						onMouseLeave={() => setIsSportsHovering(false)}
+					>
 						{/* Carousel Container */}
 						<div className="relative overflow-hidden">
 							<div
@@ -346,34 +424,38 @@ const Landing = () => {
 								{popularSports.map((sport) => (
 									<div
 										key={sport.id}
-										className="w-64 flex-shrink-0 first:ml-0 last:mr-0 cursor-pointer"
+										className="w-64 h-40 flex-shrink-0 first:ml-0 last:mr-0 cursor-pointer group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative rounded-xl"
 										onClick={() => handleSportClick(sport.id)}
 									>
-										<Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-											{/* Image Container with Overlay */}
-											<div className="relative h-40 overflow-hidden">
-												{/* Sport Image */}
-												<img
-													src={sport.image}
-													alt={sport.name}
-													className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-												/>
+										{/* Sport Image - covers the entire div */}
+										<img
+											src={sport.image}
+											alt={sport.name}
+											className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+											style={{
+												objectFit: "cover",
+												objectPosition: "center",
+											}}
+											loading="lazy"
+											onError={(e) => {
+												const target = e.target as HTMLImageElement;
+												target.src = "/assets/cricket.jpg"; // Fallback image
+											}}
+										/>
 
-												{/* Dark Overlay */}
-												<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 group-hover:from-black/80 group-hover:via-black/50 transition-all duration-300" />
+										{/* Dark Overlay */}
+										<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 group-hover:from-black/80 group-hover:via-black/50 transition-all duration-300" />
 
-												{/* Sport Name Overlay */}
-												<div className="absolute inset-0 flex flex-col justify-end p-4">
-													<h3 className="text-white font-bold text-xl mb-1">{sport.name}</h3>
-													<p className="text-white/80 text-xs line-clamp-2">{sport.description}</p>
-												</div>
+										{/* Sport Name Overlay */}
+										<div className="absolute inset-0 flex flex-col justify-end p-4 z-10">
+											<h3 className="text-white font-bold text-xl mb-1 drop-shadow-lg">{sport.name}</h3>
+											<p className="text-white/90 text-xs line-clamp-2 drop-shadow-md">{sport.description}</p>
+										</div>
 
-												{/* Hover Indicator */}
-												<div className="absolute top-3 right-3 bg-white/10 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-													<ArrowRight className="h-4 w-4 text-white" />
-												</div>
-											</div>
-										</Card>
+										{/* Hover Indicator */}
+										<div className="absolute top-3 right-3 bg-white/10 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+											<ArrowRight className="h-4 w-4 text-white" />
+										</div>
 									</div>
 								))}
 							</div>
