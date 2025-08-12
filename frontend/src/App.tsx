@@ -25,6 +25,7 @@ import OwnerBookings from "@/pages/owner/OwnerBookings";
 import VenueDetails from "@/pages/venue/VenueDetails";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import FacilityApproval from "@/pages/admin/FacilityApproval";
+import AdminUserManagement from "@/pages/admin/AdminUserManagement";
 import ComingSoon from "@/pages/ComingSoon";
 import UserDashboard from "@/pages/user/UserDashboard";
 import UserBookings from "@/pages/user/UserBookings";
@@ -119,7 +120,7 @@ function App() {
 										<Route path="dashboard" element={<AdminDashboard />} />
 										<Route path="venues/approval" element={<FacilityApproval />} />
 										<Route path="venues/:id" element={<AdminVenueDetails />} />
-										<Route path="users" element={<ComingSoon />} />
+										<Route path="users" element={<AdminUserManagement />} />
 										<Route path="bookings" element={<ComingSoon />} />
 										<Route path="profile" element={<Profile />} />
 										<Route index element={<Navigate to="/admin/dashboard" replace />} />

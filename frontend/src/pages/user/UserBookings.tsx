@@ -133,7 +133,9 @@ const UserBookings = () => {
 					<div className="flex items-center justify-between">
 						<CardDescription className="text-xs flex items-center gap-1">
 							<MapPin className="h-3 w-3" />
-							{booking.venueId.address.city}
+							{typeof booking.venueId.address === "string"
+								? booking.venueId.address
+								: booking.venueId.address?.city || "Location not available"}
 						</CardDescription>
 						<Badge variant="outline" className="text-xs h-5 px-1">
 							<Hash className="h-2.5 w-2.5 mr-0.5" />

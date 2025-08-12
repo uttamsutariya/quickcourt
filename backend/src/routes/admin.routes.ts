@@ -7,6 +7,7 @@ import {
 	rejectVenue,
 	getAllUsers,
 	toggleUserStatus,
+	getUserBookingHistory,
 } from "../controllers/admin.controller";
 import { authenticate, authorize } from "../middleware/auth.middleware";
 import { UserRole } from "../types/enums";
@@ -28,5 +29,6 @@ router.put("/venues/:id/reject", rejectVenue);
 // User management
 router.get("/users", getAllUsers);
 router.put("/users/:id/toggle-status", toggleUserStatus);
+router.get("/users/:id/bookings", getUserBookingHistory);
 
 export default router;

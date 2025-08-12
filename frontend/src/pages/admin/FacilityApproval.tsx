@@ -45,7 +45,7 @@ const FacilityApproval = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 
 	// Filters
-	const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
+	const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [cityFilter, setCityFilter] = useState("");
 	const [stateFilter, setStateFilter] = useState("");

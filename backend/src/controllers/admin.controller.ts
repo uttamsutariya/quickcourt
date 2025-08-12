@@ -1,27 +1,61 @@
 import { Request, Response, NextFunction } from "express";
 import { Venue } from "../models/Venue.model";
 import { User } from "../models/User.model";
+import { Court } from "../models/Court.model";
+import { Booking } from "../models/Booking.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import { VenueStatus, UserRole } from "../types/enums";
 
 // Get admin dashboard statistics
 export const getAdminStats = async (_req: Request, res: Response, next: NextFunction) => {
 	try {
-		// Get venue statistics
-		const [totalVenues, pendingVenues, approvedVenues, rejectedVenues] = await Promise.all([
+		// Get all statistics in parallel for better performance
+		const [
+			totalVenues,
+			pendingVenues,
+			approvedVenues,
+			rejectedVenues,
+			totalUsers,
+			totalFacilityOwners,
+			totalBookings,
+			totalActiveCourts,
+		] = await Promise.all([
+			// Venue statistics
 			Venue.countDocuments(),
 			Venue.countDocuments({ status: VenueStatus.PENDING }),
 			Venue.countDocuments({ status: VenueStatus.APPROVED }),
 			Venue.countDocuments({ status: VenueStatus.REJECTED }),
+
+			// User statistics
+			User.countDocuments({ role: UserRole.USER }),
+			User.countDocuments({ role: UserRole.FACILITY_OWNER }),
+
+			// Booking statistics
+			Booking.countDocuments(),
+
+			// Active courts count
+			Court.countDocuments({ isActive: true }),
 		]);
 
 		res.status(200).json({
 			success: true,
 			stats: {
-				totalVenues,
-				pendingVenues,
-				approvedVenues,
-				rejectedVenues,
+				venues: {
+					total: totalVenues,
+					pending: pendingVenues,
+					approved: approvedVenues,
+					rejected: rejectedVenues,
+				},
+				users: {
+					totalUsers,
+					totalFacilityOwners,
+				},
+				bookings: {
+					total: totalBookings,
+				},
+				courts: {
+					totalActive: totalActiveCourts,
+				},
 			},
 		});
 	} catch (error) {
@@ -177,11 +211,24 @@ export const rejectVenue = async (req: Request, res: Response, next: NextFunctio
 // Get all users (admin only)
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const { role, page = 1, limit = 10 } = req.query;
+		const { role, status, search, page = 1, limit = 20 } = req.query;
 
 		const query: any = {};
-		if (role) {
+
+		// Role filter
+		if (role && role !== "all") {
 			query.role = role;
+		}
+
+		// Status filter (active/inactive)
+		if (status && status !== "all") {
+			query.isActive = status === "active";
+		}
+
+		// Search by name or email
+		if (search) {
+			const searchRegex = new RegExp(search as string, "i");
+			query.$or = [{ name: searchRegex }, { email: searchRegex }];
 		}
 
 		const users = await User.find(query)
@@ -229,6 +276,62 @@ export const toggleUserStatus = async (req: Request, res: Response, next: NextFu
 			success: true,
 			message: `User ${user.isActive ? "activated" : "deactivated"} successfully`,
 			user,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+// Get user booking history (admin only)
+export const getUserBookingHistory = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const { id } = req.params;
+
+		// Verify user exists
+		const user = await User.findById(id);
+		if (!user) {
+			throw new NotFoundError("User not found");
+		}
+
+		// Get all bookings for the user with populated venue and court details
+		const bookings = await Booking.find({ userId: id })
+			.populate("venueId", "name address")
+			.populate("courtId", "name sportType")
+			.sort({
+				// Sort by status priority: confirmed (upcoming) first, then completed, then cancelled
+				status: 1,
+				bookingDate: -1,
+				startTime: -1,
+			});
+
+		// Custom sort to ensure proper ordering: upcoming -> completed -> cancelled
+		const sortedBookings = bookings.sort((a, b) => {
+			const statusPriority = {
+				confirmed: 1,
+				completed: 2,
+				cancelled: 3,
+			};
+
+			const aPriority = statusPriority[a.status as keyof typeof statusPriority] || 4;
+			const bPriority = statusPriority[b.status as keyof typeof statusPriority] || 4;
+
+			if (aPriority !== bPriority) {
+				return aPriority - bPriority;
+			}
+
+			// If same status, sort by date (newest first)
+			return new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime();
+		});
+
+		res.status(200).json({
+			success: true,
+			user: {
+				_id: user._id,
+				name: user.name,
+				email: user.email,
+				role: user.role,
+			},
+			bookings: sortedBookings,
 		});
 	} catch (error) {
 		next(error);
