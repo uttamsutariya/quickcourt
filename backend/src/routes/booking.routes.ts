@@ -6,6 +6,7 @@ import {
 	getVenueBookings,
 	getOwnerBookings,
 	getOwnerDashboardStats,
+	getOwnerChartData,
 	getBookingDetails,
 	cancelBooking,
 } from "../controllers/booking.controller";
@@ -19,6 +20,7 @@ router.use(authenticate);
 router.post("/", createBooking);
 router.get("/user", getUserBookings);
 router.get("/owner/stats", getOwnerDashboardStats);
+router.get("/owner/charts", getOwnerChartData);
 router.get("/owner", getOwnerBookings);
 router.get("/venue/:venueId", getVenueBookings);
 router.get("/:bookingId", getBookingDetails);

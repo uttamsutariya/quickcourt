@@ -389,6 +389,198 @@ export const getOwnerDashboardStats = async (req: Request, res: Response, next: 
 	}
 };
 
+// Get owner chart data for dashboard
+export const getOwnerChartData = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+	try {
+		// Check if user is facility owner
+		if (req.user.role !== "facility_owner") {
+			throw new AppError("Only facility owners can access this endpoint", 403);
+		}
+
+		// Get all venues owned by this user
+		const ownerVenues = await Venue.find({
+			ownerId: req.user._id,
+			isActive: true,
+		});
+
+		const venueIds = ownerVenues.map((v) => v._id);
+
+		if (venueIds.length === 0) {
+			// Return empty data if no venues
+			res.status(200).json({
+				success: true,
+				charts: {
+					bookingTrends: {
+						daily: [],
+						weekly: [],
+						monthly: [],
+					},
+					earningsSummary: {
+						daily: [],
+						monthly: [],
+					},
+					peakHours: [],
+				},
+			});
+			return;
+		}
+
+		// Get all bookings for owner's venues
+		const bookings = await Booking.find({
+			venueId: { $in: venueIds },
+			status: { $ne: BookingStatus.CANCELLED },
+		}).sort({ bookingDate: 1, startTime: 1 });
+
+		const now = new Date();
+
+		// 1. BOOKING TRENDS DATA
+		// Daily trends (last 30 days)
+		const dailyBookingTrends = [];
+		for (let i = 29; i >= 0; i--) {
+			const date = new Date(now);
+			date.setDate(date.getDate() - i);
+			date.setHours(0, 0, 0, 0);
+
+			const nextDate = new Date(date);
+			nextDate.setDate(nextDate.getDate() + 1);
+
+			const dayBookings = bookings.filter((b) => {
+				const bookingDate = new Date(b.bookingDate);
+				return bookingDate >= date && bookingDate < nextDate;
+			});
+
+			dailyBookingTrends.push({
+				date: date.toISOString().split("T")[0],
+				bookings: dayBookings.length,
+			});
+		}
+
+		// Weekly trends (last 12 weeks)
+		const weeklyBookingTrends = [];
+		for (let i = 11; i >= 0; i--) {
+			const weekStart = new Date(now);
+			weekStart.setDate(weekStart.getDate() - (weekStart.getDay() + 7 * i));
+			weekStart.setHours(0, 0, 0, 0);
+
+			const weekEnd = new Date(weekStart);
+			weekEnd.setDate(weekEnd.getDate() + 7);
+
+			const weekBookings = bookings.filter((b) => {
+				const bookingDate = new Date(b.bookingDate);
+				return bookingDate >= weekStart && bookingDate < weekEnd;
+			});
+
+			weeklyBookingTrends.push({
+				week: `Week ${12 - i}`,
+				date: weekStart.toISOString().split("T")[0],
+				bookings: weekBookings.length,
+			});
+		}
+
+		// Monthly trends (last 12 months)
+		const monthlyBookingTrends = [];
+		for (let i = 11; i >= 0; i--) {
+			const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+			const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+
+			const monthBookings = bookings.filter((b) => {
+				const bookingDate = new Date(b.bookingDate);
+				return bookingDate >= monthStart && bookingDate < monthEnd;
+			});
+
+			monthlyBookingTrends.push({
+				month: monthStart.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+				date: monthStart.toISOString().split("T")[0],
+				bookings: monthBookings.length,
+			});
+		}
+
+		// 2. EARNINGS SUMMARY DATA
+		// Daily earnings (last 30 days)
+		const paidBookings = bookings.filter(
+			(b) => b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.COMPLETED,
+		);
+
+		const dailyEarnings = [];
+		for (let i = 29; i >= 0; i--) {
+			const date = new Date(now);
+			date.setDate(date.getDate() - i);
+			date.setHours(0, 0, 0, 0);
+
+			const nextDate = new Date(date);
+			nextDate.setDate(nextDate.getDate() + 1);
+
+			const dayEarnings = paidBookings
+				.filter((b) => {
+					const bookingDate = new Date(b.bookingDate);
+					return bookingDate >= date && bookingDate < nextDate;
+				})
+				.reduce((sum, booking) => sum + booking.totalAmount, 0);
+
+			const netEarnings = dayEarnings * 0.9; // After 10% commission
+
+			dailyEarnings.push({
+				date: date.toISOString().split("T")[0],
+				grossEarnings: dayEarnings,
+				netEarnings: netEarnings,
+			});
+		}
+
+		// Monthly earnings (last 12 months)
+		const monthlyEarnings = [];
+		for (let i = 11; i >= 0; i--) {
+			const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+			const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+
+			const monthEarnings = paidBookings
+				.filter((b) => {
+					const bookingDate = new Date(b.bookingDate);
+					return bookingDate >= monthStart && bookingDate < monthEnd;
+				})
+				.reduce((sum, booking) => sum + booking.totalAmount, 0);
+
+			const netEarnings = monthEarnings * 0.9; // After 10% commission
+
+			monthlyEarnings.push({
+				month: monthStart.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+				date: monthStart.toISOString().split("T")[0],
+				grossEarnings: monthEarnings,
+				netEarnings: netEarnings,
+			});
+		}
+
+		// 3. PEAK HOURS DATA
+		const hourlyBookings = new Array(24).fill(0);
+		bookings.forEach((booking) => {
+			const hour = parseInt(booking.startTime.split(":")[0]);
+			hourlyBookings[hour]++;
+		});
+
+		const peakHours = hourlyBookings.map((count, hour) => ({
+			hour: `${hour.toString().padStart(2, "0")}:00`,
+			bookings: count,
+		}));
+
+		res.status(200).json({
+			success: true,
+			charts: {
+				bookingTrends: {
+					daily: dailyBookingTrends,
+					weekly: weeklyBookingTrends,
+					monthly: monthlyBookingTrends,
+				},
+				earningsSummary: {
+					daily: dailyEarnings,
+					monthly: monthlyEarnings,
+				},
+				peakHours: peakHours,
+			},
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 // Get booking details
 export const getBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
 	try {

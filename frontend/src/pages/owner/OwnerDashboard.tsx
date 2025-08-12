@@ -4,7 +4,6 @@ import {
 	Building2,
 	Plus,
 	Calendar,
-	TrendingUp,
 	Clock,
 	CheckCircle,
 	XCircle,
@@ -16,19 +15,25 @@ import {
 	ArrowUpRight,
 } from "lucide-react";
 import useAuthStore from "@/stores/auth-store";
-import ownerDashboardService, { type DashboardStats } from "@/services/owner-dashboard.service";
+import ownerDashboardService, { type DashboardStats, type ChartData } from "@/services/owner-dashboard.service";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import BookingTrendsChart from "@/components/owner/BookingTrendsChart";
+import EarningsSummaryChart from "@/components/owner/EarningsSummaryChart";
+import PeakHoursChart from "@/components/owner/PeakHoursChart";
 
 const OwnerDashboard = () => {
 	const navigate = useNavigate();
 	const { user } = useAuthStore();
 	const [stats, setStats] = useState<DashboardStats | null>(null);
+	const [chartData, setChartData] = useState<ChartData | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [chartsLoading, setChartsLoading] = useState(true);
 
 	useEffect(() => {
 		fetchDashboardStats();
+		fetchChartData();
 	}, []);
 
 	const fetchDashboardStats = async () => {
@@ -41,6 +46,19 @@ const OwnerDashboard = () => {
 			toast.error(error.response?.data?.message || "Failed to fetch dashboard statistics");
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const fetchChartData = async () => {
+		try {
+			setChartsLoading(true);
+			const data = await ownerDashboardService.getChartData();
+			setChartData(data);
+		} catch (error: any) {
+			console.error("Failed to fetch chart data:", error);
+			toast.error(error.response?.data?.message || "Failed to fetch chart data");
+		} finally {
+			setChartsLoading(false);
 		}
 	};
 
@@ -262,33 +280,42 @@ const OwnerDashboard = () => {
 				</div>
 			</div>
 
-			{/* Earnings Graph Placeholder */}
-			<div className="bg-card dark:bg-zinc-950 border rounded-lg shadow-sm p-6">
-				<div className="flex items-center justify-between mb-6">
-					<div className="flex items-center gap-3">
-						<div className="p-2 bg-muted rounded-lg">
-							<ChartBar className="h-5 w-5 text-primary" />
-						</div>
-						<div>
-							<h3 className="text-lg font-semibold">Revenue Trends</h3>
-							<p className="text-sm text-muted-foreground">Track your earnings over time</p>
-						</div>
-					</div>
-					<Button variant="outline" size="sm" disabled>
-						Coming Soon
-					</Button>
-				</div>
-				<div className="flex items-center justify-center py-16 text-muted-foreground">
-					<div className="text-center">
-						<TrendingUp className="h-16 w-16 mx-auto mb-4 opacity-20" />
-						<p className="text-lg font-medium mb-2">Revenue Analytics Coming Soon</p>
-						<p className="text-sm max-w-md">
-							Interactive charts showing your revenue trends, peak booking times, and earnings projections will be
-							available here.
-						</p>
+			{/* Charts Section */}
+			{chartsLoading ? (
+				<div className="space-y-6">
+					<Skeleton className="h-96 w-full rounded-xl" />
+					<div className="grid gap-6 lg:grid-cols-2">
+						<Skeleton className="h-96 w-full rounded-xl" />
+						<Skeleton className="h-96 w-full rounded-xl" />
 					</div>
 				</div>
-			</div>
+			) : chartData ? (
+				<div className="space-y-6">
+					{/* Booking Trends Chart */}
+					<BookingTrendsChart data={chartData.bookingTrends} />
+
+					{/* Earnings and Peak Hours Charts */}
+					<div className="grid gap-6 lg:grid-cols-2">
+						<EarningsSummaryChart data={chartData.earningsSummary} />
+						<PeakHoursChart data={chartData.peakHours} />
+					</div>
+				</div>
+			) : (
+				<div className="bg-card dark:bg-zinc-950 border rounded-lg shadow-sm p-6">
+					<div className="flex items-center justify-center py-16 text-muted-foreground">
+						<div className="text-center">
+							<ChartBar className="h-16 w-16 mx-auto mb-4 opacity-20" />
+							<p className="text-lg font-medium mb-2">Unable to load charts</p>
+							<p className="text-sm max-w-md mb-4">
+								There was an error loading your dashboard charts. Please try refreshing the page.
+							</p>
+							<Button onClick={fetchChartData} variant="outline" size="sm">
+								Retry
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{/* Alert for rejected venues */}
 			{stats.venues.rejected > 0 && (

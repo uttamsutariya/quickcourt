@@ -27,10 +27,37 @@ export interface DashboardStats {
 	};
 }
 
+export interface BookingTrendData {
+	daily: Array<{ date: string; bookings: number }>;
+	weekly: Array<{ week: string; date: string; bookings: number }>;
+	monthly: Array<{ month: string; date: string; bookings: number }>;
+}
+
+export interface EarningsData {
+	daily: Array<{ date: string; grossEarnings: number; netEarnings: number }>;
+	monthly: Array<{ month: string; date: string; grossEarnings: number; netEarnings: number }>;
+}
+
+export interface PeakHoursData {
+	hour: string;
+	bookings: number;
+}
+
+export interface ChartData {
+	bookingTrends: BookingTrendData;
+	earningsSummary: EarningsData;
+	peakHours: PeakHoursData[];
+}
+
 class OwnerDashboardService {
 	async getDashboardStats(): Promise<DashboardStats> {
 		const response = await apiClient.get<{ success: boolean; stats: DashboardStats }>("/bookings/owner/stats");
 		return response.data.stats;
+	}
+
+	async getChartData(): Promise<ChartData> {
+		const response = await apiClient.get<{ success: boolean; charts: ChartData }>("/bookings/owner/charts");
+		return response.data.charts;
 	}
 }
 
